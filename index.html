@@ -5,9 +5,8 @@
         <title>Playlistle</title>
         <script src="src/main.ts" type="module"></script>
         <style>
-          /* Initially hide the song details */
           #songName, #songArtist, #imageUrl, #audioElement {
-            visibility: hidden; /* You could also use 'display: none;' */
+            visibility: hidden;
           }
         </style>
     </head>
@@ -19,15 +18,15 @@
       <button id="replayButton">wait play it again</button>
       <button id="newSongButton">ok another one now</button>
 
+      <label for="guessInput">guess:</label>
+      <input type="text" id="guessInput" placeholder="enter your guess here..." />
+
       <label for="volumeSlider">Volume:</label>
       <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.1" />
 
       <label for="playlistUrl">yo heres my playlist:</label>
       <input type="text" id="playlistUrl" placeholder="https://open.spotify.com/playlist/..." />
       <button id="processUrlButton">do the thing</button>
-
-      <label for="guessInput">guess:</label>
-      <input type="text" id="guessInput" placeholder="enter your guess here..." />
 
       <h2 id="songName"></h2>
       <h2 id="songArtist"></h2>
