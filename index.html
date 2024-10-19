@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Playlistle</title>
+        <script src="src/main.ts" type="module"></script>
+        <style>
+          /* Initially hide the song details */
+          #songName, #songArtist, #imageUrl, #audioElement {
+            visibility: hidden; /* You could also use 'display: none;' */
+          }
+        </style>
+    </head>
+    <body>
+      <h1>Welcome to Playlistle! The song guessing game??????</h1>
+      <h2 id="loading">put in your url!!!!!</h2>
+
+      <button id="revealButton">what da song????</button>
+      <button id="replayButton">wait play it again</button>
+      <button id="newSongButton">ok another one now</button>
+
+      <label for="volumeSlider">Volume:</label>
+      <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.1" />
+
+      <label for="playlistUrl">yo heres my playlist:</label>
+      <input type="text" id="playlistUrl" placeholder="https://open.spotify.com/playlist/..." />
+      <button id="processUrlButton">do the thing</button>
+
+      <h2 id="songName"></h2>
+      <h2 id="songArtist"></h2>
+      <img id="imageUrl" src="" width="250" height="250"></img>
+      <audio controls id="audioElement">
+        <source id="previewUrl" src="" type="audio/mpeg">
+      </audio>
+    </body>
+</html>
