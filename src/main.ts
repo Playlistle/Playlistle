@@ -1,60 +1,85 @@
 /**
  * !TODO:
- * - remove playlistId intial playlist hnfvjearkiusl
- * - add the typing in feature
- * - hide api keys somehow
  * - add different time options (0.5, 1, 5)
  * - ui/ux
  */
 
-// to run: npm run dev // and then go to http://localhost:5173/
-
+// Load environment variables for Spotify API keys
 const clientId = import.meta.env.VITE_API_KEY;
 const clientSecret = import.meta.env.VITE_API_SECRET;
 
-// artist: 5OeSHuvHTS9qUgAUTt3GIR
-// track: 13X0MbPS0WOenZsShfvI5g
-// playlist: 76k53inmGadUWB9HOH0GEl
-let playlistId = "76k53inmGadUWB9HOH0GEl";
-let intialized = false
+// Global Variables
+let accessToken: string = '';
+let playlistId: string = '';
+let playlistSongs: any;
+let correctAnswer: string = '';
+let startTime: number;
 
+// Get HTML Elements
 const loadingElement = document.getElementById('loading') as HTMLElement;
-
+const correctOrNotElement = document.getElementById('correctOrNot') as HTMLElement;
 const processUrlButton = document.getElementById('processUrlButton') as HTMLButtonElement;
 const playlistUrlInput = document.getElementById('playlistUrl') as HTMLInputElement;
+const guessInput = document.getElementById('guessInput') as HTMLInputElement;
+const replayButton = document.getElementById('replayButton') as HTMLButtonElement;
+const volumeSlider = document.getElementById('volumeSlider') as HTMLInputElement;
+const songNameElement = document.getElementById('songName') as HTMLElement;
+const songArtistElement = document.getElementById('songArtist') as HTMLElement;
+const imageUrlElement = document.getElementById('imageUrl') as HTMLImageElement;
+const audioElement = document.getElementById('audioElement') as HTMLAudioElement;
+const sourceElement = document.getElementById('previewUrl') as HTMLSourceElement;
+const newSongButton = document.getElementById('newSongButton') as HTMLButtonElement;
 
+//! UTILITY FUNCTIONS
 
-processUrlButton.addEventListener('click', () => {
-    const url = playlistUrlInput.value;
+// Function to normalize a string by removing punctuation, spaces, and making it lowercase
+function normalizeString(str: string): string {
+    return str
+        .toLowerCase()
+        .replace(/[^\w\s]|_/g, "")
+        .replace(/\s+/g, " ");
+}
 
-    // Check if the URL contains the valid playlist prefix
-    if (!url.includes("https://open.spotify.com/playlist/")) {
-        console.error("Invalid Spotify Playlist URL.");
-        alert("Please enter a valid Spotify Playlist URL.");
-        return; // Exit the function early
+// Function to remove brackets and parentheses from the string
+function removeBrackets(str: string): string {
+    return str
+        .replace(/ *\[[^\]]*] */g, '')
+        .replace(/ *\([^\)]*\) */g, '');
+}
+
+// Function to calculate the Levenshtein distance (for detecting close guesses)
+function levenshteinDistance(a: string, b: string): number {
+    const matrix: number[][] = [];
+
+    for (let i = 0; i <= b.length; i++) {
+        matrix[i] = [i];
     }
 
-    if (!intialized) intializeGame();
-    intialized = true
-    loadingElement.style.visibility = 'hidden'
-    loadingElement.innerText = ""
+    for (let j = 0; j <= a.length; j++) {
+        matrix[0][j] = j;
+    }
 
-    // Remove the "https://open.spotify.com/playlist/" part and everything after the "?"
-    const extractedPlaylistId = url.replace("https://open.spotify.com/playlist/", "").split("?")[0];
+    for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+            if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j - 1] + 1,
+                    matrix[i][j - 1] + 1,
+                    matrix[i - 1][j] + 1
+                );
+            }
+        }
+    }
 
-    // Print the extracted playlist ID to the console
-    playlistId = extractedPlaylistId;
-});
+    return matrix[b.length][a.length];
+}
 
+//! SPOTIFY API FUNCTIONS
 
-
-
-
-
-const accessToken = await getAccessToken();
-let playlistSongs = await fetchReference(accessToken, "playlists/" + playlistId + "/tracks");
-
-export async function getAccessToken(): Promise<string> {
+// Fetch Spotify access token using client credentials
+async function getAccessToken(): Promise<string> {
     const url = 'https://accounts.spotify.com/api/token';
     const response = await fetch(url, {
         method: 'POST',
@@ -66,199 +91,159 @@ export async function getAccessToken(): Promise<string> {
     });
     if (response.ok) {
         const jsonResponse = await response.json();
-        const token = jsonResponse.access_token;
-        console.log(jsonResponse);
-        return token;
+        return jsonResponse.access_token;
     } else {
-        console.log(response.statusText);
+        console.error(response.statusText);
         throw new Error(`Request failed! Status code: ${response.status} ${response.statusText}`);
     }
 }
 
+// Fetch playlist songs from Spotify API
 async function fetchReference(token: string, reference: string): Promise<any> {
     const result = await fetch("https://api.spotify.com/v1/" + reference, {
-        method: "GET", headers: { Authorization: `Bearer ${token}` }
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` }
     });
-
     return await result.json();
 }
 
+//! GAME LOGIC
 
+// Initialize the game by fetching a random song from the playlist
+async function initializeGame() {
+    let validSongFound = false;
+    let attempts = 0;
 
+    while (!validSongFound && attempts < 5) {
+        attempts++;
 
-
-
-
-
-
-//Math.floor(Math.random() * 29)
-let startTime: number;
-
-const audioElement = document.getElementById('audioElement') as HTMLAudioElement;
-const sourceElement = document.getElementById('previewUrl') as HTMLSourceElement;
-const songNameElement = document.getElementById('songName') as HTMLElement;
-const songArtistElement = document.getElementById('songArtist') as HTMLElement;
-const imageUrlElement = document.getElementById('imageUrl') as HTMLImageElement;
-const revealButton = document.getElementById('revealButton') as HTMLButtonElement;
-const replayButton = document.getElementById('replayButton') as HTMLButtonElement; // Button for replay
-const volumeSlider = document.getElementById('volumeSlider') as HTMLInputElement;
-
-async function intializeGame() {
-    const morePlaylistSongs = await fetchReference(accessToken, "playlists/" + playlistId + "/tracks" + `?limit=1&offset=${Math.floor(Math.random() * playlistSongs.total)}`)
-    const randomSong = morePlaylistSongs.items[0].track;
-    const audioUrl: string = randomSong.preview_url;
-
-    console.log(randomSong.preview_url)
-    console.log(randomSong.name)
-    console.log(randomSong.artists[0].name)
-    console.log(randomSong.album.images[0].url)
-
-    document.getElementById("songName")!.innerText = randomSong.name;
-    document.getElementById("songArtist")!.innerText = randomSong.artists[0].name;
-    document.getElementById("imageUrl")!.setAttribute("src", randomSong.album.images[0].url);
-
-
-
-    sourceElement.src = audioUrl;
-    audioElement.load(); // Ensure the new source is loaded
-
-    startTime = Math.floor(Math.random() * 29); // Set the starting time for the audio
-    const playDuration = 0.5; // Play for 5 seconds before pausing
-
-    // Function to play the audio and pause after the specified duration
-    function playAndPauseAudio() {
-        if (startTime < audioElement.duration) {
-            audioElement.currentTime = startTime; // Set the starting point
-        }
-        audioElement.play(); // Start playing
-
-        // Pause the audio after the specified duration
-        setTimeout(() => {
-            audioElement.pause();
-            console.log("Audio paused after " + playDuration + " seconds.");
-        }, playDuration * 1000); // Convert seconds to milliseconds
-    }
-
-    // Wait until the audio metadata is loaded before setting currentTime
-    audioElement.addEventListener('loadedmetadata', () => {
-        playAndPauseAudio(); // Initial play and pause logic
-    });
-
-    // Set up the song details but hide them until the button is clicked
-    songNameElement.innerText = randomSong.name;
-    songArtistElement.innerText = randomSong.artists[0].name;
-    imageUrlElement.src = randomSong.album.images[0].url;
-
-    // Show the song details when the "Reveal" button is clicked
-    revealButton.addEventListener('click', () => {
-        songNameElement.style.visibility = 'visible';
-        songArtistElement.style.visibility = 'visible';
-        imageUrlElement.style.visibility = 'visible';
-    });
-
-    // Replay the audio from the starting point when the "Replay" button is clicked
-    replayButton.addEventListener('click', () => {
-        console.log("Replaying audio from " + startTime + " seconds.");
-        playAndPauseAudio(); // Reuse the same play-and-pause logic for replay
-    });
-
-
-
-
-    // Set the initial volume from the slider
-    audioElement.volume = parseFloat(volumeSlider.value);
-
-    // Add an event listener to adjust the audio volume
-    if (volumeSlider) {
-        volumeSlider.addEventListener('input', () => {
-            audioElement.volume = parseFloat(volumeSlider.value);
-            console.log("Volume set to: " + audioElement.volume);
-        });
-    }
-}
-
-
-
-
-
-
-
-// Define a function to get and display a new song
-async function getNewSong() {
-    if (intialized) {
-        // Hide song details initially
-        const songNameElement = document.getElementById("songName")!;
-        const songArtistElement = document.getElementById("songArtist")!;
-        const imageUrlElement = document.getElementById("imageUrl")!;
-
-        songNameElement.style.visibility = 'hidden';
-        songArtistElement.style.visibility = 'hidden';
-        imageUrlElement.style.visibility = 'hidden';
-
-        // Fetch a new song
-        playlistSongs = await fetchReference(accessToken, "playlists/" + playlistId + "/tracks");
-        let morePlaylistSongs: any;
-
-        for (let i = 0; i <= 4; i++) {
-            morePlaylistSongs = await fetchReference(accessToken, "playlists/" + playlistId + "/tracks" + `?limit=1&offset=${Math.floor(Math.random() * playlistSongs.total)}`)
-            if (morePlaylistSongs.items[0].track.id !== null) {
-                loadingElement.style.visibility = 'hidden'
-                loadingElement.innerText = ""
-                break;
-            }
-            console.log(i)
-            if (i == 4) {
-                console.error("Too much local songs!");
-                loadingElement.innerText = "Too much local songs! Please try a different playlist!"
-                loadingElement.style.visibility = 'visible'
-                imageUrlElement.setAttribute("src", "");
-                break;
-            }
-        }
+        // Fetch a random song from the playlist
+        const morePlaylistSongs = await fetchReference(accessToken, `playlists/${playlistId}/tracks?limit=1&offset=${Math.floor(Math.random() * playlistSongs.total)}`);
         const randomSong = morePlaylistSongs.items[0].track;
 
+        // Check if the preview URL is valid
+        if (randomSong.preview_url) {
+            validSongFound = true;
 
+            // Update UI elements with song details
+            correctAnswer = randomSong.name;
+            songNameElement.innerText = randomSong.name;
+            songArtistElement.innerText = randomSong.artists[0].name;
+            imageUrlElement.setAttribute("src", randomSong.album.images[0].url);
 
-        // Update the song details
-        songNameElement.innerText = randomSong.name;
-        songArtistElement.innerText = randomSong.artists[0].name;
-        imageUrlElement.setAttribute("src", randomSong.album.images[0].url);
+            // Hide the cover and song name
+            songNameElement.style.visibility = 'hidden';
+            songArtistElement.style.visibility = 'hidden';
+            imageUrlElement.style.visibility = 'hidden';
+            correctOrNotElement.innerText = '';
 
-        // Hide song details
-        songNameElement.style.visibility = 'hidden';
-        songArtistElement.style.visibility = 'hidden';
-        imageUrlElement.style.visibility = 'hidden';
+            // Set up audio preview
+            sourceElement.src = randomSong.preview_url;
+            audioElement.load();
 
-        // Update the audio source
-        const audioUrl: string = randomSong.preview_url;
-        const sourceElement = document.getElementById('previewUrl') as HTMLSourceElement;
-        const audioElement = document.getElementById('audioElement') as HTMLAudioElement;
+            startTime = Math.floor(Math.random() * 29); // Random start time for audio
 
-        if (sourceElement && audioElement) {
-            sourceElement.src = audioUrl;
-            audioElement.load(); // Ensure the new source is loaded
+            // Play audio and pause after a short duration
+            audioElement.addEventListener('loadedmetadata', () => {
+                playAndPauseAudio(0.5); // Play for 0.5 seconds by default
+            });
+
+        } else {
+            console.log(`Attempt ${attempts}: Song has no preview URL, trying another...`);
         }
 
-        // Optionally play the new song for a short time
-        startTime = Math.floor(Math.random() * 29)
-        audioElement.currentTime = startTime; // Set the starting point
-        audioElement.play(); // Start playing
-
-        // You can keep or adjust the pause logic here
-        setTimeout(() => {
-            audioElement.pause();
-            console.log("Audio paused after playing.");
-        }, 5000); // Change duration as needed
+        // If after 5 attempts no valid song is found, show an error
+        if (attempts === 5 && !validSongFound) {
+            loadingElement.style.visibility = 'visible';
+            loadingElement.innerText = "Too much local songs! Please try a different playlist!";
+            imageUrlElement.setAttribute("src", ""); // Clear any image
+        }
     }
 }
 
-// Add event listener for the new song button
-const newSongButton = document.getElementById('newSongButton') as HTMLButtonElement;
-if (newSongButton) {
-    newSongButton.addEventListener('click', getNewSong);
+// Function to play audio and pause after a given duration
+function playAndPauseAudio(duration: number) {
+    if (startTime < 30) {
+        audioElement.currentTime = startTime;
+    }
+    audioElement.play();
+
+    setTimeout(() => {
+        audioElement.pause();
+    }, duration * 1000);
 }
 
+// Check the user's guess when they press Enter in the input field
+guessInput.addEventListener('keypress', function (event) {
+    if (event.key === "Enter") {
+        const userGuess = normalizeString(guessInput.value.trim());
+        const normalizedCorrectAnswer = normalizeString(correctAnswer.trim());
+        const normalizedAnswerWithoutBrackets = normalizeString(removeBrackets(correctAnswer.trim()));
 
+        // Function to reveal the song details
+        function revealSongDetails() {
+            songNameElement.style.visibility = 'visible';
+            songArtistElement.style.visibility = 'visible';
+            imageUrlElement.style.visibility = 'visible';
+        }
 
+        // Correct guess
+        if (userGuess === normalizedCorrectAnswer || userGuess === normalizedAnswerWithoutBrackets) {
+            correctOrNotElement.innerText = "yep you got it";
+            revealSongDetails();
+            guessInput.value = '';
+        } 
+        // Minor error (close guess)
+        else {
+            const distance = levenshteinDistance(userGuess, normalizedAnswerWithoutBrackets);
+            if (distance <= 2) {
+                correctOrNotElement.innerText = "minor spelling mistake bottom text";
+            } 
+            // Incorrect guess
+            else {
+                correctOrNotElement.innerText = "nope yikes";
+                revealSongDetails();
+                guessInput.value = '';
+            }
+        }
+    }
+});
 
-console.log("Done!")
+//! EVENT HANDLERS AND INITIALIZATION
+
+// Handle playlist URL input and start game
+processUrlButton.addEventListener('click', async () => {
+    const url = playlistUrlInput.value;
+    if (!url.includes("https://open.spotify.com/playlist/")) {
+        alert("Please enter a valid Spotify Playlist URL.");
+        return;
+    }
+
+    // Hide text
+    correctOrNotElement.innerText = "";
+
+    // Extract playlist ID from URL
+    playlistId = url.replace("https://open.spotify.com/playlist/", "").split("?")[0];
+    
+    // Fetch access token and playlist songs
+    accessToken = await getAccessToken();
+    playlistSongs = await fetchReference(accessToken, `playlists/${playlistId}/tracks`);
+
+    loadingElement.style.visibility = 'hidden';
+    loadingElement.innerText = '';
+    await initializeGame();
+});
+
+// Handle replay button click
+replayButton.addEventListener('click', () => {
+    playAndPauseAudio(0.5);
+});
+
+// Handle new song button click
+newSongButton.addEventListener('click', initializeGame);
+
+// Set initial volume from the slider
+audioElement.volume = parseFloat(volumeSlider.value);
+volumeSlider.addEventListener('input', () => {
+    audioElement.volume = parseFloat(volumeSlider.value);
+});
