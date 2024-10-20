@@ -9,6 +9,8 @@
  * - score tracking
  * - switch over to people logging in w/ spotify // figure out api keys
  * - add daily rounds stored in a server for each artist (so there can be acloudyskyele, madeonle, etc.)
+ * - save playlists even when browser closes
+ * - skip guess
  */
 
 // Load environment variables for Spotify API keys

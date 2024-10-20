@@ -1,6 +1,7 @@
 #songName, #songArtist, #imageUrl, #audioElement {
-    visibility: hidden; /* You could also use 'display: none;' */
-  }
+    visibility: hidden;
+    align-self: center;
+}
 
 div {
     display: flex;
