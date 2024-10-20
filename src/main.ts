@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any no-window no-window-prefix
 /**
  * !TODO:
  * - ui/ux
@@ -18,10 +19,10 @@ const clientId = import.meta.env.VITE_API_KEY;
 const clientSecret = import.meta.env.VITE_API_SECRET;
 
 // Global Variables
-let accessToken: string = '';
-let playlistId: string = '';
+let accessToken = '';
+let playlistId = '';
+let correctAnswer = '';
 let playlistSongs: any;
-let correctAnswer: string = '';
 let startTime: number;
 let startTime1: number;
 let startTime2: number;
@@ -249,19 +250,19 @@ function addPlaylistToDropdown(playlistId: string, playlistName: string) {
     localStorage.setItem('playlists', JSON.stringify(storedPlaylists));
 }
 
+// Function to reveal the song details
+function revealSongDetails() {
+    songNameElement.style.visibility = 'visible';
+    songArtistElement.style.visibility = 'visible';
+    imageUrlElement.style.visibility = 'visible';
+}
+
 // Check the user's 1st guess when they press Enter in the input field
 guessInput1.addEventListener('keypress', function (event) {
     if (event.key === "Enter") {
         const userGuess = normalizeString(guessInput1.value.trim());
         const normalizedCorrectAnswer = normalizeString(correctAnswer.trim());
         const normalizedAnswerWithoutBrackets = normalizeString(removeBrackets(correctAnswer.trim()));
-
-        // Function to reveal the song details
-        function revealSongDetails() {
-            songNameElement.style.visibility = 'visible';
-            songArtistElement.style.visibility = 'visible';
-            imageUrlElement.style.visibility = 'visible';
-        }
 
         // Correct guess
         if (userGuess === normalizedCorrectAnswer || userGuess === normalizedAnswerWithoutBrackets) {
@@ -298,13 +299,6 @@ guessInput2.addEventListener('keypress', function (event) {
         const normalizedCorrectAnswer = normalizeString(correctAnswer.trim());
         const normalizedAnswerWithoutBrackets = normalizeString(removeBrackets(correctAnswer.trim()));
 
-        // Function to reveal the song details
-        function revealSongDetails() {
-            songNameElement.style.visibility = 'visible';
-            songArtistElement.style.visibility = 'visible';
-            imageUrlElement.style.visibility = 'visible';
-        }
-
         // Correct guess
         if (userGuess === normalizedCorrectAnswer || userGuess === normalizedAnswerWithoutBrackets) {
             correctOrNotElement.innerText = "yep you got it";
@@ -339,13 +333,6 @@ guessInput3.addEventListener('keypress', function (event) {
         const userGuess = normalizeString(guessInput3.value.trim());
         const normalizedCorrectAnswer = normalizeString(correctAnswer.trim());
         const normalizedAnswerWithoutBrackets = normalizeString(removeBrackets(correctAnswer.trim()));
-
-        // Function to reveal the song details
-        function revealSongDetails() {
-            songNameElement.style.visibility = 'visible';
-            songArtistElement.style.visibility = 'visible';
-            imageUrlElement.style.visibility = 'visible';
-        }
 
         // Correct guess
         if (userGuess === normalizedCorrectAnswer || userGuess === normalizedAnswerWithoutBrackets) {
