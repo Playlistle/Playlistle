@@ -224,6 +224,7 @@ async function initializeGame() {
             audioElement.load();
 
             startTime = Math.random() * 29; // Random start time for audio
+            startTime1 = startTime
 
             // Play audio and pause after a short duration
             audioElement.addEventListener('loadedmetadata', () => {
