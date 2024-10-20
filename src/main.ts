@@ -1,6 +1,5 @@
 /**
  * !TODO:
- * - add different time options (0.5, 1, 5)
  * - ui/ux
  */
 
@@ -39,65 +38,6 @@ const sourceElement = document.getElementById('previewUrl') as HTMLSourceElement
 const newSongButton = document.getElementById('newSongButton') as HTMLButtonElement;
 const playlistDropdown = document.getElementById('playlistDropdown') as HTMLSelectElement;
 const removePlaylistButton = document.getElementById('removePlaylistButton') as HTMLButtonElement;
-
-// Function to add playlist to the dropdown and store it in local storage
-function addPlaylistToDropdown(playlistId: string, playlistName: string) {
-    // Ensure playlistName is valid (not undefined or empty)
-    if (!playlistName) {
-        console.error('Invalid playlist name');
-        return;
-    }
-
-    // Check if the playlist is already in the dropdown
-    const existingOption = Array.from(playlistDropdown.options).find(option => option.value === playlistId);
-    if (existingOption) {
-        return; // Don't add duplicates
-    }
-
-    const option = document.createElement('option');
-    option.value = playlistId;
-    option.text = playlistName;
-    playlistDropdown.add(option);
-
-    // Store the playlist in local storage
-    const storedPlaylists = JSON.parse(localStorage.getItem('playlists') || '[]');
-    storedPlaylists.push({ id: playlistId, name: playlistName });
-    localStorage.setItem('playlists', JSON.stringify(storedPlaylists));
-}
-
-// Function to load playlists from local storage on page load
-function loadPlaylistsFromLocalStorage() {
-    // Preserve the first option (assuming it's a placeholder like "Select a playlist")
-    const placeholderOption = playlistDropdown.options[0];
-    
-    // Clear the dropdown except the placeholder
-    playlistDropdown.innerHTML = ''; // Clears all options
-    playlistDropdown.add(placeholderOption); // Re-add the placeholder option
-
-    const storedPlaylists = JSON.parse(localStorage.getItem('playlists') || '[]');
-    storedPlaylists.forEach((playlist: { id: string, name: string }) => {
-        addPlaylistToDropdown(playlist.id, playlist.name);
-    });
-}
-
-// Function to handle playlist selection change
-playlistDropdown.addEventListener('change', async () => {
-    const selectedPlaylistId = playlistDropdown.value;
-    if (selectedPlaylistId) {
-        playlistId = selectedPlaylistId;
-
-        // Fetch access token if not already available
-        if (!accessToken) {
-            accessToken = await getAccessToken();
-        }
-
-        // Fetch songs from the selected playlist
-        playlistSongs = await fetchReference(accessToken, `playlists/${playlistId}/tracks`);
-
-        // Initialize the game with the selected playlist
-        await initializeGame();
-    }
-});
 
 //! UTILITY FUNCTIONS
 
@@ -143,6 +83,21 @@ function levenshteinDistance(a: string, b: string): number {
     }
 
     return matrix[b.length][a.length];
+}
+
+// Function to load playlists from local storage on page load
+function loadPlaylistsFromLocalStorage() {
+    // Preserve the first option (assuming it's a placeholder like "Select a playlist")
+    const placeholderOption = playlistDropdown.options[0];
+    
+    // Clear the dropdown except the placeholder
+    playlistDropdown.innerHTML = ''; // Clears all options
+    playlistDropdown.add(placeholderOption); // Re-add the placeholder option
+
+    const storedPlaylists = JSON.parse(localStorage.getItem('playlists') || '[]');
+    storedPlaylists.forEach((playlist: { id: string, name: string }) => {
+        addPlaylistToDropdown(playlist.id, playlist.name);
+    });
 }
 
 //! SPOTIFY API FUNCTIONS
@@ -257,6 +212,31 @@ function playAndPauseAudio(duration: number, overrideStartTime?: number) {
     setTimeout(() => {
         audioElement.pause();
     }, duration * 1000);
+}
+
+// Function to add playlist to the dropdown and store it in local storage
+function addPlaylistToDropdown(playlistId: string, playlistName: string) {
+    // Ensure playlistName is valid (not undefined or empty)
+    if (!playlistName) {
+        console.error('Invalid playlist name');
+        return;
+    }
+
+    // Check if the playlist is already in the dropdown
+    const existingOption = Array.from(playlistDropdown.options).find(option => option.value === playlistId);
+    if (existingOption) {
+        return; // Don't add duplicates
+    }
+
+    const option = document.createElement('option');
+    option.value = playlistId;
+    option.text = playlistName;
+    playlistDropdown.add(option);
+
+    // Store the playlist in local storage
+    const storedPlaylists = JSON.parse(localStorage.getItem('playlists') || '[]');
+    storedPlaylists.push({ id: playlistId, name: playlistName });
+    localStorage.setItem('playlists', JSON.stringify(storedPlaylists));
 }
 
 // Check the user's 1st guess when they press Enter in the input field
@@ -434,6 +414,25 @@ removePlaylistButton.addEventListener('click', () => {
 
     // Reset the dropdown to the placeholder option
     playlistDropdown.value = ''; // This sets it to the first option, "Select a playlist"
+});
+
+// Function to handle playlist selection change
+playlistDropdown.addEventListener('change', async () => {
+    const selectedPlaylistId = playlistDropdown.value;
+    if (selectedPlaylistId) {
+        playlistId = selectedPlaylistId;
+
+        // Fetch access token if not already available
+        if (!accessToken) {
+            accessToken = await getAccessToken();
+        }
+
+        // Fetch songs from the selected playlist
+        playlistSongs = await fetchReference(accessToken, `playlists/${playlistId}/tracks`);
+
+        // Initialize the game with the selected playlist
+        await initializeGame();
+    }
 });
 
 // Handle replay button click
