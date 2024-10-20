@@ -5,49 +5,74 @@
         <title>Playlistle</title>
         <link rel="icon" href="favicon.ico" type="image/x-icon">
         <script src="src/main.ts" type="module"></script>
-        <style>
-          #songName, #songArtist, #imageUrl, #audioElement {
-            visibility: hidden;
-          }
-        </style>
+        <link rel="stylesheet" type="text/css" href="style.css">
     </head>
     <body>
-      <h1>Welcome to Playlistle! The song guessing game??????</h1>
-      <h2 id="loading"></h2>
-      <h2 id="correctOrNot"></h2>
+      <div id="headers">
+        <h1>Welcome to Playlistle! The song guessing game??????</h1>
+        <h2 id="loading"></h2>
+        <h2 id="correctOrNot"></h2>
+      </div>
 
-      <button id="newSongButton">ok another one now</button>
+      <div id="playlist">
 
-      <button id="replayButton1">wait play it again</button>
-      <label for="guessInput1">guess 1 (0.5 seconds):</label>
-      <input type="text" id="guessInput1" placeholder="enter your guess here..." />
+        <div id="input">
+          <label for="playlistUrl">yo heres my playlist:</label>
+          <input type="text" id="playlistUrl" placeholder="https://open.spotify.com/playlist/..." />
+          <button id="processUrlButton">add playlist to list</button>
+        </div>
 
-      <button id="replayButton2">wait play it again</button>
-      <label for="guessInput2">guess 2 (1 second):</label>
-      <input type="text" id="guessInput2" placeholder="enter your guess here..." />
+        <div id="selector">
+          <label for="playlistDropdown">select playlist:</label>
+          <select id="playlistDropdown">
+            <option value="">pick one</option>
+          </select>
+          <button id="removePlaylistButton">i dont want this playlist anymore</button>
+        </div>
+        
+      </div>
 
-      <button id="replayButton3">wait play it again</button>
-      <label for="guessInput3">guess 3 (3 seconds):</label>
-      <input type="text" id="guessInput3" placeholder="enter your guess here..." />
+      <div id="songInfo">
+        <h2 id="songName"></h2>
+        <h2 id="songArtist"></h2>
+        <img id="imageUrl" src="" width="250" height="250"></img>
+        <audio controls id="audioElement">
+          <source id="previewUrl" src="" type="audio/mpeg">
+        </audio>
+      </div>
+      
+      <div id="controls">
 
-      <label for="volumeSlider">Volume:</label>
-      <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.1" />
+        <div id="buttons">
 
-      <label for="playlistDropdown">select playlist:</label>
-      <select id="playlistDropdown">
-        <option value="">pick one</option>
-      </select>
-      <button id="removePlaylistButton">i dont want this playlist anymore</button>
+          <div id="replay1">
+            <button id="replayButton1">wait play it again</button>
+            <label for="guessInput1">guess 1 (0.5 seconds):</label>
+            <input type="text" id="guessInput1" placeholder="enter your guess here..." />
+          </div>
+          
+          <div id="replay2">
+            <button id="replayButton2">wait play it again</button>
+            <label for="guessInput2">guess 2 (1 second):</label>
+            <input type="text" id="guessInput2" placeholder="enter your guess here..." />
+          </div>
 
-      <label for="playlistUrl">yo heres my playlist:</label>
-      <input type="text" id="playlistUrl" placeholder="https://open.spotify.com/playlist/..." />
-      <button id="processUrlButton">add playlist to list</button>
+          <div id="replay3">
+            <button id="replayButton3">wait play it again</button>
+            <label for="guessInput3">guess 3 (3 seconds):</label>
+            <input type="text" id="guessInput3" placeholder="enter your guess here..." />
+          </div>
+          
+          <button id="newSongButton">ok another one now</button>
+        </div>
+        
+        <div id="volume">
+          <label for="volumeSlider">Volume:</label>
+          <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.1" />
+        </div>
+        
 
-      <h2 id="songName"></h2>
-      <h2 id="songArtist"></h2>
-      <img id="imageUrl" src="" width="250" height="250"></img>
-      <audio controls id="audioElement">
-        <source id="previewUrl" src="" type="audio/mpeg">
-      </audio>
+      </div>
+
     </body>
 </html>
