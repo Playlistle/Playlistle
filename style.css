@@ -1,0 +1,43 @@
+#songName, #songArtist, #imageUrl, #audioElement {
+    visibility: hidden; /* You could also use 'display: none;' */
+  }
+
+div {
+    display: flex;
+    margin: 10px;
+}
+
+h1, h2 {
+    text-align: center;
+}
+
+#headers {
+    flex-direction: column;
+}
+
+#playlist, #songInfo, #controls, #buttons {
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+}
+
+#input, #selector {
+    flex-direction: row;
+    justify-content: center;
+    gap: 10px;
+}
+
+#newSongButton {
+    align-self: center;
+}
+
+#replay1, #replay2, #replay3 {
+    justify-content: center;
+    gap: 10px
+}
+
+#volume {
+    flex-direction: row;
+    justify-content: center;
+    gap: 10px;
+}
