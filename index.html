@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8">
         <title>Playlistle</title>
+        <link rel="icon" href="favicon.ico" type="image/x-icon">
         <script src="src/main.ts" type="module"></script>
         <style>
           #songName, #songArtist, #imageUrl, #audioElement {
@@ -12,21 +13,35 @@
     </head>
     <body>
       <h1>Welcome to Playlistle! The song guessing game??????</h1>
-      <h2 id="loading">put in your url!!!!!</h2>
+      <h2 id="loading"></h2>
       <h2 id="correctOrNot"></h2>
 
-      <button id="replayButton">wait play it again</button>
       <button id="newSongButton">ok another one now</button>
 
-      <label for="guessInput">guess:</label>
-      <input type="text" id="guessInput" placeholder="enter your guess here..." />
+      <button id="replayButton1">wait play it again</button>
+      <label for="guessInput1">guess 1 (0.5 seconds):</label>
+      <input type="text" id="guessInput1" placeholder="enter your guess here..." />
+
+      <button id="replayButton2">wait play it again</button>
+      <label for="guessInput2">guess 2 (1 second):</label>
+      <input type="text" id="guessInput2" placeholder="enter your guess here..." />
+
+      <button id="replayButton3">wait play it again</button>
+      <label for="guessInput3">guess 3 (3 seconds):</label>
+      <input type="text" id="guessInput3" placeholder="enter your guess here..." />
 
       <label for="volumeSlider">Volume:</label>
       <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.1" />
 
+      <label for="playlistDropdown">select playlist:</label>
+      <select id="playlistDropdown">
+        <option value="">pick one</option>
+      </select>
+      <button id="removePlaylistButton">i dont want this playlist anymore</button>
+
       <label for="playlistUrl">yo heres my playlist:</label>
       <input type="text" id="playlistUrl" placeholder="https://open.spotify.com/playlist/..." />
-      <button id="processUrlButton">do the thing</button>
+      <button id="processUrlButton">add playlist to list</button>
 
       <h2 id="songName"></h2>
       <h2 id="songArtist"></h2>
