@@ -1,6 +1,14 @@
 /**
  * !TODO:
  * - ui/ux
+ * - add album support
+ * - add artist support
+ * - add yt and apple music support (maybe)
+ * - album art guessing game
+ * - album comparison game
+ * - score tracking
+ * - switch over to people logging in w/ spotify // figure out api keys
+ * - add daily rounds stored in a server for each artist (so there can be acloudyskyele, madeonle, etc.)
  */
 
 // Load environment variables for Spotify API keys
