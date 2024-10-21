@@ -109,6 +109,7 @@ async function initializeGame() {
     songArtistElement.style.visibility = 'hidden';
     imageUrlElement.style.visibility = 'hidden';
     correctOrNotElement.innerText = '';
+    loadingElement.innerText = '';
 
     // Guess inputs
     guessInput1.disabled = false

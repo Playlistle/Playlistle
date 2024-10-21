@@ -8,10 +8,9 @@
         <link rel="stylesheet" type="text/css" href="style.css">
     </head>
     <body>
-      <div id="headers">
+      <div id="header">
         <h1 id="title">Welcome to Playlistle! The song guessing game??????</h1>
-        <h2 id="loading"></h2>
-        <h2 id="correctOrNot"></h2>
+        
       </div>
 
       <div id="playlist">
@@ -51,13 +50,15 @@
         
       </div>
 
+      
+
       <div id="songInfo">
+
         <h2 id="songName"></h2>
         <h2 id="songArtist"></h2>
         <img id="imageUrl" src="" width="250" height="250"></img>
-        <audio controls id="audioElement">
-          <source id="previewUrl" src="" type="audio/mpeg">
-        </audio>
+        <h2 id="correctOrNot"></h2>
+
       </div>
       
       <div id="controls">
@@ -92,6 +93,13 @@
         
 
       </div>
+
+      <footer>
+        <h2 id="loading"></h2>
+        <audio controls id="audioElement">
+          <source id="previewUrl" src="" type="audio/mpeg">
+        </audio>
+      </footer>
 
     </body>
 </html>
