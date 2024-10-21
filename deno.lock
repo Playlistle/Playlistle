@@ -3,6 +3,7 @@
   "packages": {
     "specifiers": {
       "npm:@deno/vite-plugin@^1.0.0": "npm:@deno/vite-plugin@1.0.0_vite@5.4.9",
+      "npm:create-vite-extra@latest": "npm:create-vite-extra@2.3.0",
       "npm:vite": "npm:vite@5.4.9",
       "npm:vite@^5.4.8": "npm:vite@5.4.9"
     },
@@ -173,6 +174,14 @@
         "integrity": "sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw==",
         "dependencies": {}
       },
+      "create-vite-extra@2.3.0": {
+        "integrity": "sha512-awpjGw/zh5FxhgU5oKMwGxtp/uIApIOLNdzg+rpIB+BiW+JnJHk5g0GB21ZuBE3q/rzyTgo8BTy9wC1x0Apgqw==",
+        "dependencies": {
+          "minimist": "minimist@1.2.8",
+          "picocolors": "picocolors@1.1.1",
+          "prompts": "prompts@2.4.2"
+        }
+      },
       "esbuild@0.21.5": {
         "integrity": "sha512-mg3OPMV4hXywwpoDxu3Qda5xCKQi+vCTZq8S9J/EpkhB2HzKXq4SNFZE3+NK93JYxc8VMSep+lOUSC/RVKaBqw==",
         "dependencies": {
@@ -205,6 +214,14 @@
         "integrity": "sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==",
         "dependencies": {}
       },
+      "kleur@3.0.3": {
+        "integrity": "sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==",
+        "dependencies": {}
+      },
+      "minimist@1.2.8": {
+        "integrity": "sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==",
+        "dependencies": {}
+      },
       "nanoid@3.3.7": {
         "integrity": "sha512-eSRppjcPIatRIMC1U6UngP8XFcz8MQWGQdt1MTBQ7NaAmvXDfvNxbvWV3x2y6CdEUciCSsDHDQZbhYaB8QEo2g==",
         "dependencies": {}
@@ -219,6 +236,13 @@
           "nanoid": "nanoid@3.3.7",
           "picocolors": "picocolors@1.1.1",
           "source-map-js": "source-map-js@1.2.1"
+        }
+      },
+      "prompts@2.4.2": {
+        "integrity": "sha512-NxNv/kLguCA7p3jE8oL2aEBsrJWgAakBpgmgK6lpPWV+WuOmY6r2/zbAVnP+T8bQlA0nzHXSJSJW0Hq7ylaD2Q==",
+        "dependencies": {
+          "kleur": "kleur@3.0.3",
+          "sisteransi": "sisteransi@1.0.5"
         }
       },
       "rollup@4.24.0": {
@@ -243,6 +267,10 @@
           "@types/estree": "@types/estree@1.0.6",
           "fsevents": "fsevents@2.3.3"
         }
+      },
+      "sisteransi@1.0.5": {
+        "integrity": "sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==",
+        "dependencies": {}
       },
       "source-map-js@1.2.1": {
         "integrity": "sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==",
