@@ -20,6 +20,8 @@ import * as fn from "./functions.ts"
  * - random symobls are stillin cluded
  */
 
+//#region VARIABLE DELCARATIONS
+
 // Global Variables
 let accessToken = '';
 let playlistId = '';
@@ -58,8 +60,9 @@ const removePlaylistButton = document.getElementById('removePlaylistButton') as 
 const artistDropdown = document.getElementById('artistDropdown') as HTMLSelectElement;
 const removeArtistButton = document.getElementById('removeArtistButton') as HTMLButtonElement;
 const artistToggleInput = document.getElementById('playlistOrArtist') as HTMLInputElement;
+//#endregion
 
-//! UTILITY FUNCTIONS
+//#region UTILITY FUNCTIONS
 
 // Function to load playlists from local storage on page load
 function loadPlaylistsFromLocalStorage() {
@@ -87,7 +90,9 @@ function loadPlaylistsFromLocalStorage() {
     });
 }
 
-//! GAME LOGIC
+//#endregion
+
+//#region GAME LOGIC
 
 // Initialize the game by fetching a random song from the playlist
 async function initializeGame() {
@@ -193,36 +198,25 @@ function addPlaylistToDropdown(playlistId: string, playlistName: string, artist:
     localStorage.setItem(dropdown, JSON.stringify(storedPlaylists));
 }
 
-// Function to reveal the song details
-function revealSongDetails() {
-    songNameElement.style.visibility = 'visible';
-    songArtistElement.style.visibility = 'visible';
-    imageUrlElement.style.visibility = 'visible';
-}
+//#endregion
 
+//#region GUESS HANDLERS
 // Check the user's 1st guess when they press Enter in the input field
 guessInput1.addEventListener('keypress', function (event) {
     if (event.key === "Enter") {
-        const userGuess = fn.normalizeString(guessInput1.value.trim());
-        const normalizedCorrectAnswer = fn.normalizeString(correctAnswer.trim());
-        const normalizedAnswerWithoutBrackets = fn.normalizeString(fn.removeBrackets(correctAnswer.trim()));
 
-        // Correct guess
-        if (userGuess === normalizedCorrectAnswer || userGuess === normalizedAnswerWithoutBrackets) {
-            correctOrNotElement.innerText = "yep you got it";
-            guessInput1.disabled = true;
-            guessInput2.disabled = true;
-            guessInput3.disabled = true;
-            revealSongDetails();
-        }
-        // Minor error (close guess)
-        else {
-            const distance = fn.levenshteinDistance(userGuess, normalizedAnswerWithoutBrackets);
-            if (distance <= 2) {
+        switch (guessHelper(guessInput1.value)) {
+            case GUESS_STATUS.CORRECT:
+                correctOrNotElement.innerText = "yep you got it";
+                guessInput1.disabled = true;
+                guessInput2.disabled = true;
+                guessInput3.disabled = true;
+                revealSongDetails();
+                break;
+            case GUESS_STATUS.TYPO:
                 correctOrNotElement.innerText = "minor spelling mistake bottom text";
-            }
-            // Incorrect guess
-            else {
+                break;
+            case GUESS_STATUS.INCORRECT:
                 correctOrNotElement.innerText = "nope yikes";
                 guessInput1.disabled = true;
                 guessInput2.disabled = false;
@@ -230,7 +224,7 @@ guessInput1.addEventListener('keypress', function (event) {
                 startTime1 = startTime
                 startTime = Math.random() * 29;
                 replayButton2.disabled = false;
-            }
+                break;
         }
     }
 });
@@ -238,26 +232,18 @@ guessInput1.addEventListener('keypress', function (event) {
 // Check the user's 2nd guess when they press Enter in the input field
 guessInput2.addEventListener('keypress', function (event) {
     if (event.key === "Enter") {
-        const userGuess = fn.normalizeString(guessInput2.value.trim());
-        const normalizedCorrectAnswer = fn.normalizeString(correctAnswer.trim());
-        const normalizedAnswerWithoutBrackets = fn.normalizeString(fn.removeBrackets(correctAnswer.trim()));
-
-        // Correct guess
-        if (userGuess === normalizedCorrectAnswer || userGuess === normalizedAnswerWithoutBrackets) {
-            correctOrNotElement.innerText = "yep you got it";
-            revealSongDetails();
-            guessInput1.disabled = true;
-            guessInput2.disabled = true;
-            guessInput3.disabled = true;
-        }
-        // Minor error (close guess)
-        else {
-            const distance = fn.levenshteinDistance(userGuess, normalizedAnswerWithoutBrackets);
-            if (distance <= 2) {
+        switch (guessHelper(guessInput2.value)) {
+            case GUESS_STATUS.CORRECT:
+                correctOrNotElement.innerText = "yep you got it";
+                guessInput1.disabled = true;
+                guessInput2.disabled = true;
+                guessInput3.disabled = true;
+                revealSongDetails();
+                break;
+            case GUESS_STATUS.TYPO:
                 correctOrNotElement.innerText = "minor spelling mistake bottom text";
-            }
-            // Incorrect guess
-            else {
+                break;
+            case GUESS_STATUS.INCORRECT:
                 correctOrNotElement.innerText = "nope yikes";
                 guessInput2.disabled = true;
                 guessInput3.disabled = false;
@@ -265,7 +251,7 @@ guessInput2.addEventListener('keypress', function (event) {
                 startTime2 = startTime
                 startTime = Math.random() * 29;
                 replayButton3.disabled = false;
-            }
+                break;
         }
     }
 });
@@ -273,36 +259,29 @@ guessInput2.addEventListener('keypress', function (event) {
 // Check the user's 3rd guess when they press Enter in the input field
 guessInput3.addEventListener('keypress', function (event) {
     if (event.key === "Enter") {
-        const userGuess = fn.normalizeString(guessInput3.value.trim());
-        const normalizedCorrectAnswer = fn.normalizeString(correctAnswer.trim());
-        const normalizedAnswerWithoutBrackets = fn.normalizeString(fn.removeBrackets(correctAnswer.trim()));
-
-        // Correct guess
-        if (userGuess === normalizedCorrectAnswer || userGuess === normalizedAnswerWithoutBrackets) {
-            correctOrNotElement.innerText = "yep you got it";
-            guessInput1.disabled = true;
-            guessInput2.disabled = true;
-            guessInput3.disabled = true;
-            revealSongDetails();
-        }
-        // Minor error (close guess)
-        else {
-            const distance = fn.levenshteinDistance(userGuess, normalizedAnswerWithoutBrackets);
-            if (distance <= 2) {
+        switch (guessHelper(guessInput3.value)) {
+            case GUESS_STATUS.CORRECT:
+                correctOrNotElement.innerText = "yep you got it";
+                guessInput1.disabled = true;
+                guessInput2.disabled = true;
+                guessInput3.disabled = true;
+                revealSongDetails();
+                break;
+            case GUESS_STATUS.TYPO:
                 correctOrNotElement.innerText = "minor spelling mistake bottom text";
-            }
-            // Incorrect guess
-            else {
+                break;
+            case GUESS_STATUS.INCORRECT:
                 correctOrNotElement.innerText = "nope yikes";
                 startTime3 = startTime
                 guessInput3.disabled = true;
                 revealSongDetails();
-            }
+                break;
         }
     }
 });
+//#endregion
 
-//! EVENT HANDLERS AND INITIALIZATION
+//#region EVENT HANDLERS AND INITIALIZATION
 
 // Handle playlist URL input and add playlist to the dropdown without initializing the game
 processUrlButton.addEventListener('click', async () => {
@@ -459,3 +438,46 @@ artistToggleInput.addEventListener('click', () => {
 window.addEventListener('load', () => {
     loadPlaylistsFromLocalStorage();
 });
+//#endregion
+
+//#region HELPER FUNCTIONS
+
+const enum GUESS_STATUS {
+    CORRECT = 0,
+    TYPO = 1,
+    INCORRECT = 2,
+}
+
+//Handles what happens on guess
+function guessHelper(input: string) {
+    const userGuess = fn.normalizeString(input.trim());
+    const normalizedCorrectAnswer = fn.normalizeString(correctAnswer.trim());
+    const normalizedAnswerWithoutBrackets = fn.normalizeString(fn.removeBrackets(correctAnswer.trim()));
+
+    //Correct guess
+    if (userGuess === normalizedCorrectAnswer || userGuess === normalizedAnswerWithoutBrackets) {
+        return 0;
+    }
+    
+    //Minor error (close guess)
+    else {
+        const distance = fn.levenshteinDistance(userGuess, normalizedAnswerWithoutBrackets);
+        if (distance <= 2) {
+            return 1
+        }
+        //Incorrect guess
+        else {
+            return 2;
+        }
+    }
+
+}
+
+// Function to reveal the song details
+function revealSongDetails() {
+    songNameElement.style.visibility = 'visible';
+    songArtistElement.style.visibility = 'visible';
+    imageUrlElement.style.visibility = 'visible';
+}
+
+//#endregion
