@@ -33,6 +33,7 @@ let songLength: number;
 let playlistOrArtist = false; // playlist = false, artist = true
 
 // Get HTML Elements
+const titleElement = document.getElementById('title') as HTMLElement;
 const loadingElement = document.getElementById('loading') as HTMLElement;
 const correctOrNotElement = document.getElementById('correctOrNot') as HTMLElement;
 const processUrlButton = document.getElementById('processUrlButton') as HTMLButtonElement;
@@ -405,6 +406,8 @@ playlistDropdown.addEventListener('change', async () => {
             accessToken = await fn.getAccessToken();
         }
 
+        titleElement.innerText = "Welcome to Playlistle! The song guessing game??????"
+
         // Initialize the game with the selected playlist
         await initializeGame();
     }
@@ -419,6 +422,7 @@ artistDropdown.addEventListener('change', async () => {
         if (!accessToken) {
             accessToken = await fn.getAccessToken();
         }
+        titleElement.innerText = "Welcome to " + artistDropdown.options[artistDropdown.selectedIndex].innerText + "le! The song guessing game??????"
 
         // Initialize the game with the selected playlist
         await initializeGame();
