@@ -21,9 +21,7 @@ const titleElement = document.getElementById('title') as HTMLElement;
 const loadingElement = document.getElementById('loading') as HTMLElement;
 const correctOrNotElement = document.getElementById('correctOrNot') as HTMLElement;
 const processUrlButton = document.getElementById('processUrlButton') as HTMLButtonElement;
-const processArtistUrlButton = document.getElementById('processUrlButton1') as HTMLButtonElement;
 const urlInput = document.getElementById('urlInput') as HTMLInputElement;
-const artistUrlInput = document.getElementById('artistUrl') as HTMLInputElement;
 const inputLabel = document.getElementById('inputLabel') as HTMLLabelElement;
 const guessInput = document.getElementById('guessInput') as HTMLInputElement;
 const replayButton = document.getElementById('replayButton') as HTMLButtonElement;
@@ -35,7 +33,6 @@ const sourceElement = document.getElementById('previewUrl') as HTMLSourceElement
 const newSongButton = document.getElementById('newSongButton') as HTMLButtonElement;
 const optionDropdown = document.getElementById('optionDropdown') as HTMLSelectElement;
 const removeOptionButton = document.getElementById('removePlaylistButton') as HTMLButtonElement;
-const removeArtistButton = document.getElementById('removeArtistButton') as HTMLButtonElement;
 const playlistCheckbox = document.getElementById('playlistCheckbox') as HTMLInputElement;
 const artistCheckbox = document.getElementById('artistCheckbox') as HTMLInputElement;
 const submitButton = document.getElementById('submitButton') as HTMLInputElement;
@@ -147,6 +144,8 @@ function addPlaylistToDropdown(playlistId: string, playlistName: string) {
 processUrlButton.addEventListener('click', async () => {
     const url = urlInput.value;
     if (playlistCheckbox.checked) {
+        // Process Playlist
+
         if (!url.includes("https://open.spotify.com/playlist/")) {
             alert("Please enter a valid Spotify Playlist URL.");
             return;
@@ -170,19 +169,26 @@ processUrlButton.addEventListener('click', async () => {
             console.error('Invalid playlist data received');
         }
     } else if (artistCheckbox.checked) {
+        // Process Artist
+
         if (!url.includes("https://open.spotify.com/artist/")) {
             alert("Please enter a valid Spotify Artist URL.");
             return;
         }
     
+        // Extract artist ID from URL
         artistId = url.replace("https://open.spotify.com/artist/", "").split("?")[0];
     
+        // Fetch access token and artist info
         accessToken = await fn.getAccessToken();
         const artistData = await fn.fetchReference(accessToken, `artists/${artistId}`);
     
+        // Check if artistData has a valid name
         if (artistData.name) {
             addPlaylistToDropdown(artistId, artistData.name);
-            artistUrlInput.value = '';
+
+            // Clear the input field after adding the playlist
+            urlInput.value = '';
         } else {
             console.error('Invalid artist data received');
         }
@@ -297,6 +303,8 @@ playlistCheckbox.addEventListener('click', () => {
     playlistCheckbox.disabled = true;
 
     urlInput.placeholder="https://open.spotify.com/playlist/...";
+
+    loadPlaylistsFromLocalStorage();
 })
 
 // Artist Toggle
@@ -307,6 +315,8 @@ artistCheckbox.addEventListener('click', () => {
     artistCheckbox.disabled = true;
 
     urlInput.placeholder="https://open.spotify.com/artist/...";
+
+    loadPlaylistsFromLocalStorage();
 })
 
 // Load playlists from local storage when the page is loaded
