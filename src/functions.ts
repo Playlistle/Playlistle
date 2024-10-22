@@ -128,6 +128,7 @@ export async function getRandomSongFromArtist(artistUrl: string) {
     // Fetch albums with pagination to collect all albums
     do {
         const artistAlbums = await fetchReference(accessToken, `artists/${artistUrl}/albums?limit=${limit}&offset=${offset}`);
+        console.log(artistAlbums);
         albums = albums.concat(artistAlbums.items as Album[]);
         totalAlbums = artistAlbums.total;
         offset += limit;

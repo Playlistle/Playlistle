@@ -16,36 +16,27 @@
       <div id="playlist">
 
         <div id="input">
-          <label for="playlistUrl">yo heres my playlist:</label>
-          <input type="text" id="playlistUrl" placeholder="https://open.spotify.com/playlist/..." autocomplete="off"/>
-          <button id="processUrlButton">add playlist to list</button>
+          <label for="playlistUrl">yo heres my thing:</label>
+          <input type="text" id="urlInput" placeholder="https://open.spotify.com/playlist/..." autocomplete="off"/>
+          <button id="processUrlButton">add to list</button>
         </div>
 
         <div id="selector">
-          <label for="playlistDropdown">select playlist:</label>
-          <select id="playlistDropdown">
+          <label for="optionDropdown">select option:</label>
+          <select id="optionDropdown">
             <option value="">pick one</option>
           </select>
-          <button id="removePlaylistButton">i dont want this playlist anymore</button>
-        </div>
-
-        <div id="input">
-          <label for="artistUrl">yo heres my artist:</label>
-          <input type="text" id="artistUrl" placeholder="https://open.spotify.com/artist/..." autocomplete="off"/>
-          <button id="processUrlButton1">add artist to list</button>
+          <button id="removePlaylistButton">i dont want this thing anymore</button>
         </div>
 
         <div id="selector">
-          <label for="artistDropdown">select artist:</label>
-          <select id="artistDropdown">
-            <option value="">pick one</option>
-          </select>
-          <button id="removeArtistButton">i dont want this artist anymore</button>
-        </div>
+          <label for="playlistCheckbox">use playlist?</label>
+          <input type="checkbox" id="playlistCheckbox" checked="true" disabled="true">
 
-        <div id="selector">
-          <label for="playlistOrArtist">use artist?</label>
-          <input type="checkbox" id="playlistOrArtist">
+          <label for="artistCheckbox">use artist?</label>
+          <input type="checkbox" id="artistCheckbox">
+
+
         </div>
         
       </div>
@@ -54,9 +45,9 @@
 
       <div id="songInfo">
 
-        <h2 id="songArtistAndName"></h2>
-        <img id="imageUrl" src="" width="250" height="250"></img>
-        <h2 id="correctOrNot"></h2>
+        <h2 id="songArtistAndName"> </h2>
+        <img id="imageUrl" src="" width="250" height="250" alt="Cover art for the song/album"></img>
+        <h2 id="correctOrNot"> </h2>
 
       </div>
       
