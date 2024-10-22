@@ -5,7 +5,6 @@ import * as fn from "./functions.ts"
  * !TODO:
  * - ui/ux
  * - add album support
- * - add artist support
  * - add yt and apple music support (maybe)
  * - album art guessing game
  * - album comparison game
@@ -13,7 +12,6 @@ import * as fn from "./functions.ts"
  * - switch over to people logging in w/ spotify // figure out api keys
  * - add daily rounds stored in a server for each artist (so there can be acloudyskyele, madeonle, etc.)
  * - save playlists even when browser closes
- * - skip guess
  * - add check to see if playlist is public
  * - when it trys again when song has no id, the play again doesn work
  * - excalmations marks are still included
@@ -21,6 +19,7 @@ import * as fn from "./functions.ts"
  * - consolidate guess inputs, make guesses visible when round ends
  * - guess dropdown (database)
  * - automatically play song/add play song button when round ends
+ * - consolidate link input; Add checkbox toggles for mode
  */
 
 //#region VARIABLE DELCARATIONS
@@ -51,8 +50,7 @@ const inputLabel = document.getElementById('inputLabel') as HTMLLabelElement;
 const guessInput = document.getElementById('guessInput') as HTMLInputElement;
 const replayButton = document.getElementById('replayButton') as HTMLButtonElement;
 const volumeSlider = document.getElementById('volumeSlider') as HTMLInputElement;
-const songNameElement = document.getElementById('songName') as HTMLElement;
-const songArtistElement = document.getElementById('songArtist') as HTMLElement;
+const songInfoElement = document.getElementById('songArtistAndName') as HTMLElement;
 const imageUrlElement = document.getElementById('imageUrl') as HTMLImageElement;
 const audioElement = document.getElementById('audioElement') as HTMLAudioElement;
 const sourceElement = document.getElementById('previewUrl') as HTMLSourceElement;
@@ -108,13 +106,11 @@ async function initializeGame() {
     
     // Update UI elements with song details
     correctAnswer = randomSong?.name as string;
-    songNameElement.innerText = randomSong?.name as string;
-    songArtistElement.innerText = randomSong?.artists as string;
+    songInfoElement.innerText = `${randomSong?.artists as string} - ${randomSong?.name as string}`;
     imageUrlElement.setAttribute("src", randomSong?.image as string);
 
     // Hide the cover and song name
-    songNameElement.style.visibility = 'hidden';
-    songArtistElement.style.visibility = 'hidden';
+    songInfoElement.style.visibility = 'hidden';
     imageUrlElement.style.visibility = 'hidden';
     correctOrNotElement.innerText = '';
     loadingElement.innerText = '';
@@ -443,8 +439,7 @@ function skipHandler() {
 
 // Function to reveal the song details
 function revealSongDetails() {
-    songNameElement.style.visibility = 'visible';
-    songArtistElement.style.visibility = 'visible';
+    songInfoElement.style.visibility = 'visible';
     imageUrlElement.style.visibility = 'visible';
 }
 
