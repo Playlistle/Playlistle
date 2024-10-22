@@ -18,6 +18,9 @@ import * as fn from "./functions.ts"
  * - when it trys again when song has no id, the play again doesn work
  * - excalmations marks are still included
  * - random symobls are stillin cluded
+ * - consolidate guess inputs, make guesses visible when round ends
+ * - guess dropdown (database)
+ * - automatically play song/add play song button when round ends
  */
 
 //#region VARIABLE DELCARATIONS
@@ -27,11 +30,13 @@ let accessToken = '';
 let playlistId = '';
 let artistId = '';
 let correctAnswer = '';
+let guessCount: number;
 let startTime: number;
 let startTime1: number;
 let startTime2: number;
 let startTime3: number;
 let songLength: number;
+let guesses: string[];
 let playlistOrArtist = false; // playlist = false, artist = true
 
 // Get HTML Elements
@@ -42,12 +47,9 @@ const processUrlButton = document.getElementById('processUrlButton') as HTMLButt
 const processArtistUrlButton = document.getElementById('processUrlButton1') as HTMLButtonElement;
 const playlistUrlInput = document.getElementById('playlistUrl') as HTMLInputElement;
 const artistUrlInput = document.getElementById('artistUrl') as HTMLInputElement;
-const guessInput1 = document.getElementById('guessInput1') as HTMLInputElement;
-const guessInput2 = document.getElementById('guessInput2') as HTMLInputElement;
-const guessInput3 = document.getElementById('guessInput3') as HTMLInputElement;
-const replayButton1 = document.getElementById('replayButton1') as HTMLButtonElement;
-const replayButton2 = document.getElementById('replayButton2') as HTMLButtonElement;
-const replayButton3 = document.getElementById('replayButton3') as HTMLButtonElement;
+const inputLabel = document.getElementById('inputLabel') as HTMLLabelElement;
+const guessInput = document.getElementById('guessInput') as HTMLInputElement;
+const replayButton = document.getElementById('replayButton') as HTMLButtonElement;
 const volumeSlider = document.getElementById('volumeSlider') as HTMLInputElement;
 const songNameElement = document.getElementById('songName') as HTMLElement;
 const songArtistElement = document.getElementById('songArtist') as HTMLElement;
@@ -60,6 +62,7 @@ const removePlaylistButton = document.getElementById('removePlaylistButton') as 
 const artistDropdown = document.getElementById('artistDropdown') as HTMLSelectElement;
 const removeArtistButton = document.getElementById('removeArtistButton') as HTMLButtonElement;
 const artistToggleInput = document.getElementById('playlistOrArtist') as HTMLInputElement;
+const skipButton = document.getElementById('skipButton') as HTMLButtonElement;
 //#endregion
 
 //#region UTILITY FUNCTIONS
@@ -117,16 +120,13 @@ async function initializeGame() {
     loadingElement.innerText = '';
 
     // Guess inputs
-    guessInput1.disabled = false
-    replayButton1.disabled = false;
-    guessInput1.value = '';
-    guessInput2.disabled = true;
-    replayButton2.disabled = true;
-    guessInput2.value = '';
-    guessInput3.disabled = true;
-    replayButton3.disabled = true;
-    guessInput3.value = '';
+    guessInput.disabled = false
+    skipButton.disabled = false;
+    guessInput.value = '';
+    inputLabel.innerText = "guess 1 (0.5 seconds):";
 
+    guessCount = 0;
+    guesses = [];
     songLength = 0.5;
 
     // Set up audio preview
@@ -198,87 +198,6 @@ function addPlaylistToDropdown(playlistId: string, playlistName: string, artist:
     localStorage.setItem(dropdown, JSON.stringify(storedPlaylists));
 }
 
-//#endregion
-
-//#region GUESS HANDLERS
-// Check the user's 1st guess when they press Enter in the input field
-guessInput1.addEventListener('keypress', function (event) {
-    if (event.key === "Enter") {
-
-        switch (guessHelper(guessInput1.value)) {
-            case GUESS_STATUS.CORRECT:
-                correctOrNotElement.innerText = "yep you got it";
-                guessInput1.disabled = true;
-                guessInput2.disabled = true;
-                guessInput3.disabled = true;
-                revealSongDetails();
-                break;
-            case GUESS_STATUS.TYPO:
-                correctOrNotElement.innerText = "minor spelling mistake bottom text";
-                break;
-            case GUESS_STATUS.INCORRECT:
-                correctOrNotElement.innerText = "nope yikes";
-                guessInput1.disabled = true;
-                guessInput2.disabled = false;
-                songLength = 1;
-                startTime1 = startTime
-                startTime = Math.random() * 29;
-                replayButton2.disabled = false;
-                break;
-        }
-    }
-});
-
-// Check the user's 2nd guess when they press Enter in the input field
-guessInput2.addEventListener('keypress', function (event) {
-    if (event.key === "Enter") {
-        switch (guessHelper(guessInput2.value)) {
-            case GUESS_STATUS.CORRECT:
-                correctOrNotElement.innerText = "yep you got it";
-                guessInput1.disabled = true;
-                guessInput2.disabled = true;
-                guessInput3.disabled = true;
-                revealSongDetails();
-                break;
-            case GUESS_STATUS.TYPO:
-                correctOrNotElement.innerText = "minor spelling mistake bottom text";
-                break;
-            case GUESS_STATUS.INCORRECT:
-                correctOrNotElement.innerText = "nope yikes";
-                guessInput2.disabled = true;
-                guessInput3.disabled = false;
-                songLength = 3;
-                startTime2 = startTime
-                startTime = Math.random() * 29;
-                replayButton3.disabled = false;
-                break;
-        }
-    }
-});
-
-// Check the user's 3rd guess when they press Enter in the input field
-guessInput3.addEventListener('keypress', function (event) {
-    if (event.key === "Enter") {
-        switch (guessHelper(guessInput3.value)) {
-            case GUESS_STATUS.CORRECT:
-                correctOrNotElement.innerText = "yep you got it";
-                guessInput1.disabled = true;
-                guessInput2.disabled = true;
-                guessInput3.disabled = true;
-                revealSongDetails();
-                break;
-            case GUESS_STATUS.TYPO:
-                correctOrNotElement.innerText = "minor spelling mistake bottom text";
-                break;
-            case GUESS_STATUS.INCORRECT:
-                correctOrNotElement.innerText = "nope yikes";
-                startTime3 = startTime
-                guessInput3.disabled = true;
-                revealSongDetails();
-                break;
-        }
-    }
-});
 //#endregion
 
 //#region EVENT HANDLERS AND INITIALIZATION
@@ -409,16 +328,29 @@ artistDropdown.addEventListener('change', async () => {
     }
 });
 
+// Check the user's guess when they press Enter in the input field
+guessInput.addEventListener('keypress', function (event) {
+    if (event.key === "Enter") {
+        guessHelper(guessInput.value);
+    }
+});
+
 // Handle replay button click
-replayButton1.addEventListener('click', () => {
-    playAndPauseAudio(0.5, startTime1);
+replayButton.addEventListener('click', () => {
+    switch (guessCount) {
+        case 0:
+            playAndPauseAudio(0.5, startTime);
+            break;
+        case 1:
+            playAndPauseAudio(1, startTime);
+            break;
+        default: 
+            playAndPauseAudio(3, startTime);
+    }
 });
-replayButton2.addEventListener('click', () => {
-    playAndPauseAudio(1, startTime2);
-});
-replayButton3.addEventListener('click', () => {
-    playAndPauseAudio(3, startTime3);
-});
+
+// Skips the current guess
+skipButton.addEventListener('click', skipHandler)
 
 // Handle new song button click
 newSongButton.addEventListener('click', initializeGame);
@@ -442,35 +374,71 @@ window.addEventListener('load', () => {
 
 //#region HELPER FUNCTIONS
 
-const enum GUESS_STATUS {
-    CORRECT = 0,
-    TYPO = 1,
-    INCORRECT = 2,
-}
-
-//Handles what happens on guess
+// Handles what happens on guess
 function guessHelper(input: string) {
     const userGuess = fn.normalizeString(input.trim());
     const normalizedCorrectAnswer = fn.normalizeString(correctAnswer.trim());
     const normalizedAnswerWithoutBrackets = fn.normalizeString(fn.removeBrackets(correctAnswer.trim()));
 
-    //Correct guess
+    // Correct guess
     if (userGuess === normalizedCorrectAnswer || userGuess === normalizedAnswerWithoutBrackets) {
-        return 0;
+        correctOrNotElement.innerText = "yep you got it";
+        guessInput.disabled = true;
+        skipButton.disabled = true;
+        revealSongDetails();
     }
     
-    //Minor error (close guess)
+    // Minor error (close guess)
     else {
         const distance = fn.levenshteinDistance(userGuess, normalizedAnswerWithoutBrackets);
         if (distance <= 2) {
-            return 1
+            correctOrNotElement.innerText = "minor spelling mistake bottom text";
         }
-        //Incorrect guess
+        // Incorrect guess
         else {
-            return 2;
+            correctOrNotElement.innerText = "nope yikes";
+            guessIterator();
         }
     }
 
+}
+
+// Iterates guess count and changes UI elements accordingly
+function guessIterator() {
+    guesses.push(guessInput.value);
+    guessCount++;
+    switch (guessCount) {
+        case 1:
+
+            songLength = 1;
+            startTime1 = startTime
+            startTime = Math.random() * 29;
+            inputLabel.innerText = "guess 2 (1 second):"
+            guessInput.value = '';
+            break;
+
+        case 2:
+            songLength = 3;
+            startTime2 = startTime
+            startTime = Math.random() * 29;
+            inputLabel.innerText = "guess 3 (3 seconds):"
+            guessInput.value = '';
+            break;
+
+        case 3:
+            correctOrNotElement.innerText = "damn that sucks";
+            skipButton.disabled = true;
+            guessInput.disabled = true;
+            startTime3 = startTime
+            revealSongDetails();
+            break;
+    }
+}
+
+// Handles skip buttons
+function skipHandler() {
+    correctOrNotElement.innerText = "nah that's fair I gotchu";
+    guessIterator();
 }
 
 // Function to reveal the song details

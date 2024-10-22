@@ -32,7 +32,7 @@ h1, h2 {
     align-self: center;
 }
 
-#replay1, #replay2, #replay3 {
+#replay {
     justify-content: center;
     gap: 10px
 }
