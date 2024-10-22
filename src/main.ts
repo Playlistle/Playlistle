@@ -60,6 +60,7 @@ const removePlaylistButton = document.getElementById('removePlaylistButton') as 
 const artistDropdown = document.getElementById('artistDropdown') as HTMLSelectElement;
 const removeArtistButton = document.getElementById('removeArtistButton') as HTMLButtonElement;
 const artistToggleInput = document.getElementById('playlistOrArtist') as HTMLInputElement;
+const submitButton = document.getElementById('submitButton') as HTMLInputElement;
 const skipButton = document.getElementById('skipButton') as HTMLButtonElement;
 //#endregion
 
@@ -117,6 +118,7 @@ async function initializeGame() {
 
     // Guess inputs
     guessInput.disabled = false
+    submitButton.disabled = false;
     skipButton.disabled = false;
     guessInput.value = '';
     inputLabel.innerText = "guess 1 (0.5 seconds):";
@@ -331,6 +333,11 @@ guessInput.addEventListener('keypress', function (event) {
     }
 });
 
+// Check the user's guess when they click the button
+submitButton.addEventListener('click', () => {
+    guessHelper(guessInput.value);
+});
+
 // Handle replay button click
 replayButton.addEventListener('click', () => {
     switch (guessCount) {
@@ -376,12 +383,20 @@ function guessHelper(input: string) {
     const normalizedCorrectAnswer = fn.normalizeString(correctAnswer.trim());
     const normalizedAnswerWithoutBrackets = fn.normalizeString(fn.removeBrackets(correctAnswer.trim()));
 
+    // Input is blank
+    if (userGuess == '') {
+        correctOrNotElement.innerText = "hey vro your answer is blank";
+        return;
+    }
+
     // Correct guess
     if (userGuess === normalizedCorrectAnswer || userGuess === normalizedAnswerWithoutBrackets) {
         correctOrNotElement.innerText = "yep you got it";
         guessInput.disabled = true;
+        submitButton.disabled = true;
         skipButton.disabled = true;
         revealSongDetails();
+        return;
     }
     
     // Minor error (close guess)
@@ -389,6 +404,7 @@ function guessHelper(input: string) {
         const distance = fn.levenshteinDistance(userGuess, normalizedAnswerWithoutBrackets);
         if (distance <= 2) {
             correctOrNotElement.innerText = "minor spelling mistake bottom text";
+            return;
         }
         // Incorrect guess
         else {
@@ -423,6 +439,7 @@ function guessIterator() {
 
         case 3:
             correctOrNotElement.innerText = "damn that sucks";
+            submitButton.disabled = true;
             skipButton.disabled = true;
             guessInput.disabled = true;
             startTime3 = startTime
