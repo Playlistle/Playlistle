@@ -7,6 +7,7 @@ import * as fn from "./functions.ts"
 let accessToken = '';
 let playlistId = '';
 let artistId = '';
+let albumId = '';
 let correctAnswer = '';
 let guessCount: number;
 let startTime: number;
@@ -35,6 +36,7 @@ const optionDropdown = document.getElementById('optionDropdown') as HTMLSelectEl
 const removeOptionButton = document.getElementById('removePlaylistButton') as HTMLButtonElement;
 const playlistCheckbox = document.getElementById('playlistCheckbox') as HTMLInputElement;
 const artistCheckbox = document.getElementById('artistCheckbox') as HTMLInputElement;
+const albumCheckbox = document.getElementById('albumCheckbox') as HTMLInputElement;
 const submitButton = document.getElementById('submitButton') as HTMLInputElement;
 const skipButton = document.getElementById('skipButton') as HTMLButtonElement;
 //#endregion
@@ -48,6 +50,8 @@ async function initializeGame() {
         randomSong = await fn.getRandomSongFromArtist("https://open.spotify.com/artist/" + artistId)
     } else if (playlistCheckbox.checked) {
         randomSong = await fn.getRandomSongFromPlaylist("https://open.spotify.com/playlist/" + playlistId)
+    } else if (albumCheckbox.checked) {
+        randomSong = await fn.getRandomSongFromAlbum("https://open.spotify.com/album/" + albumId)
     }
     
     // Update UI elements with song details
@@ -117,7 +121,7 @@ function addPlaylistToDropdown(playlistId: string, playlistName: string) {
     }
 
     // Check if the playlist is already in the dropdown
-    let existingOption = Array.from(optionDropdown.options).find(option => option.value === playlistId);
+    const existingOption = Array.from(optionDropdown.options).find(option => option.value === playlistId);
     if (existingOption) {
         return; // Don't add duplicates
     }
@@ -127,11 +131,14 @@ function addPlaylistToDropdown(playlistId: string, playlistName: string) {
     option.text = playlistName;
     optionDropdown.add(option);
     
-    let dropdown = "playlists";
-    if (artistCheckbox.checked) dropdown = "artists";
+    let dropdown = "";
+    if (playlistCheckbox.checked) dropdown = "playlists";
+    else if (artistCheckbox.checked) dropdown = "artists";
+    else if (albumCheckbox.checked) dropdown = "albums";
 
     // Store the playlist in local storage
     const storedPlaylists = JSON.parse(localStorage.getItem(dropdown) || '[]');
+    
     storedPlaylists.push({ id: playlistId, name: playlistName });
     localStorage.setItem(dropdown, JSON.stringify(storedPlaylists));
 }
@@ -192,6 +199,30 @@ processUrlButton.addEventListener('click', async () => {
         } else {
             console.error('Invalid artist data received');
         }
+    } else if (albumCheckbox.checked) {
+        // Process Album
+
+        if (!url.includes("https://open.spotify.com/album/")) {
+            alert("Please enter a valid Spotify Album URL.");
+            return;
+        }
+    
+        // Extract artist ID from URL
+        albumId = url.replace("https://open.spotify.com/album/", "").split("?")[0];
+    
+        // Fetch access token and artist info
+        accessToken = await fn.getAccessToken();
+        const albumData = await fn.fetchReference(accessToken, `albums/${albumId}`);
+    
+        // Check if artistData has a valid name
+        if (albumData.name) {
+            addPlaylistToDropdown(albumId, albumData.name);
+
+            // Clear the input field after adding the playlist
+            urlInput.value = '';
+        } else {
+            console.error('Invalid album data received');
+        }
     }
     
 });
@@ -217,6 +248,8 @@ removeOptionButton.addEventListener('click', () => {
         storageType = 'playlists';
     } else if (artistCheckbox.checked) {
         storageType = 'artists';
+    } else if (albumCheckbox.checked) {
+        storageType = 'albums';
     }
 
     // Remove from local storage
@@ -226,6 +259,8 @@ removeOptionButton.addEventListener('click', () => {
         updatedOptions = storedOptions.filter((playlist: { id: string }) => playlist.id !== selectedOptionId);
     } else if (artistCheckbox.checked) {
         updatedOptions = storedOptions.filter((artist: { id: string }) => artist.id !== selectedOptionId);
+    } else if (albumCheckbox.checked) {
+        updatedOptions = storedOptions.filter((album: { id: string }) => album.id !== selectedOptionId);
     }
     
     // Update local storage
@@ -248,7 +283,7 @@ optionDropdown.addEventListener('change', async () => {
 
         if (playlistCheckbox.checked) {
             titleElement.innerText = "Welcome to Playlistle! The song guessing game??????"
-        } else if (artistCheckbox.checked) {
+        } else if (artistCheckbox.checked || albumCheckbox.checked) {
             titleElement.innerText = "Welcome to " + optionDropdown.options[optionDropdown.selectedIndex].innerText + "le! The song guessing game??????"
         }
 
@@ -290,6 +325,8 @@ volumeSlider.addEventListener('input', () => {
 playlistCheckbox.addEventListener('click', () => {
     artistCheckbox.disabled = false;
     artistCheckbox.checked = false;
+    albumCheckbox.disabled = false;
+    albumCheckbox.checked = false;
 
     playlistCheckbox.disabled = true;
 
@@ -302,10 +339,26 @@ playlistCheckbox.addEventListener('click', () => {
 artistCheckbox.addEventListener('click', () => {
     playlistCheckbox.disabled = false;
     playlistCheckbox.checked = false;
+    albumCheckbox.disabled = false;
+    albumCheckbox.checked = false;
 
     artistCheckbox.disabled = true;
 
     urlInput.placeholder="https://open.spotify.com/artist/...";
+
+    loadPlaylistsFromLocalStorage();
+})
+
+// Album Toggle
+albumCheckbox.addEventListener('click', () => {
+    playlistCheckbox.disabled = false;
+    playlistCheckbox.checked = false;
+    artistCheckbox.disabled = false;
+    artistCheckbox.checked = false;
+
+    albumCheckbox.disabled = true;
+
+    urlInput.placeholder="https://open.spotify.com/album/...";
 
     loadPlaylistsFromLocalStorage();
 })
@@ -420,6 +473,11 @@ function loadPlaylistsFromLocalStorage() {
         const storedArtists = JSON.parse(localStorage.getItem('artists') || '[]');
         storedArtists.forEach((artist: { id: string, name: string }) => {
             addPlaylistToDropdown(artist.id, artist.name);
+        });
+    } else if (albumCheckbox.checked) {
+        const storedAlbums = JSON.parse(localStorage.getItem('albums') || '[]');
+        storedAlbums.forEach((album: { id: string, name: string }) => {
+            addPlaylistToDropdown(album.id, album.name);
         });
     }
 }

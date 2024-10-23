@@ -39,7 +39,7 @@ interface RandomSong {
 
 //#endregion
 
-//#region ACCESS TOKEN FUNCTION
+//#region ACCESS TOKEN FUNCTIONS
 
 // Fetch Spotify access token using client credentials
 export async function getAccessToken(): Promise<string> {
@@ -69,6 +69,10 @@ export async function fetchReference(token: string, reference: string): Promise<
     });
     return await result.json();
 }
+
+//#endregion
+
+//#region UTILITY FUNCTIONS
 
 // Function to normalize a string by removing punctuation, spaces, and making it lowercase
 export function normalizeString(str: string): string {
@@ -234,6 +238,33 @@ export async function getRandomSongFromPlaylist(playlistUrl: string) {
             return randomSong;
         }
     }
+}
+
+// Get random song info from Spotify playlist URL
+export async function getRandomSongFromAlbum(albumUrl: string) {
+
+    const accessToken = await getAccessToken();
+    if (!albumUrl.startsWith("https://open.spotify.com/album/")) {
+        alert("Please enter a valid Spotify Album URL.");
+        return;
+    }
+
+    albumUrl = albumUrl.replace("https://open.spotify.com/album/", "").split("?")[0];
+
+    const albumInfo = await fetchReference(accessToken, `albums/${albumUrl}`);
+    const albumSongs = await fetchReference(accessToken, `albums/${albumUrl}/tracks`);
+
+    const randomSongInfo = await fetchReference(accessToken, `albums/${albumUrl}/tracks?limit=1&offset=${Math.floor(Math.random() * albumSongs.total)}`);
+    const track = randomSongInfo.items[0];
+
+    const randomSong: RandomSong = {
+        artists: track.artists.map((artist: Artist) => artist.name).join(', '),
+        preview_url: track.preview_url,
+        image: albumInfo.images[0].url,
+        name: track.name
+    };
+
+    return randomSong;
 }
 
 //#endregion
