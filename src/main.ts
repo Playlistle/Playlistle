@@ -138,7 +138,7 @@ function addPlaylistToDropdown(playlistId: string, playlistName: string) {
 
 //#endregion
 
-//#region EVENT HANDLERS AND INITIALIZATION
+//#region EVENT HANDLERS AND UI INITIALIZATION
 
 // Handle playlist URL input and add playlist to the dropdown without initializing the game
 processUrlButton.addEventListener('click', async () => {

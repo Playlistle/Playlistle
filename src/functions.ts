@@ -1,6 +1,8 @@
 const clientId = import.meta.env.VITE_API_KEY;
 const clientSecret = import.meta.env.VITE_API_SECRET;
 
+//#region INTERFACES
+
 // Define interfaces for Spotify API responses
 interface Album {
     id: string;
@@ -34,6 +36,10 @@ interface RandomSong {
     viable_source?: boolean;
     filtered_songs?: number;
 }
+
+//#endregion
+
+//#region ACCESS TOKEN FUNCTION
 
 // Fetch Spotify access token using client credentials
 export async function getAccessToken(): Promise<string> {
@@ -107,6 +113,10 @@ export function levenshteinDistance(a: string, b: string): number {
 
     return matrix[b.length][a.length];
 }
+
+//#endregion
+
+//#region RANDOM SONG FUNCTIONS
 
 // Get random song info from Spotify artist URL
 export async function getRandomSongFromArtist(artistUrl: string) {
@@ -225,3 +235,5 @@ export async function getRandomSongFromPlaylist(playlistUrl: string) {
         }
     }
 }
+
+//#endregion
