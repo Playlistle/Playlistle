@@ -271,16 +271,7 @@ submitButton.addEventListener('click', () => {
 
 // Handle replay button click
 replayButton.addEventListener('click', () => {
-    switch (guessCount) {
-        case 0:
-            playAndPauseAudio(0.5, startTime);
-            break;
-        case 1:
-            playAndPauseAudio(1, startTime);
-            break;
-        default: 
-            playAndPauseAudio(3, startTime);
-    }
+    playAndPauseAudio(songLength, startTime);
 });
 
 // Skips the current guess
@@ -376,6 +367,7 @@ function guessIterator() {
             startTime = Math.random() * 29;
             inputLabel.innerText = "guess 2 (1 second):"
             guessInput.value = '';
+            playAndPauseAudio(songLength, startTime);
             break;
 
         case 2:
@@ -384,6 +376,7 @@ function guessIterator() {
             startTime = Math.random() * 29;
             inputLabel.innerText = "guess 3 (3 seconds):"
             guessInput.value = '';
+            playAndPauseAudio(songLength, startTime);
             break;
 
         case 3:
