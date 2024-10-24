@@ -137,6 +137,10 @@ function addPlaylistToDropdown(playlistId: string, playlistName: string) {
 
     // Store the playlist in local storage
     const storedPlaylists = JSON.parse(localStorage.getItem(dropdown) || '[]');
+    const isPlaylistStored = storedPlaylists.some((playlist: { id: string }) => playlist.id === playlistId);
+    if (isPlaylistStored) {
+        return; // Don't add duplicates to local storage
+    }
     
     storedPlaylists.push({ id: playlistId, name: playlistName });
     localStorage.setItem(dropdown, JSON.stringify(storedPlaylists));
