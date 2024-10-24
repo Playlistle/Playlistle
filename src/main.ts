@@ -15,6 +15,9 @@ let startTime2: number;
 let startTime3: number;
 let songLength: number;
 let guesses: string[];
+let score = 0;
+let lives = 3;
+let finishedRound = false;
 
 // Get HTML Elements
 const titleElement = document.getElementById('title') as HTMLElement;
@@ -38,12 +41,25 @@ const artistCheckbox = document.getElementById('artistCheckbox') as HTMLInputEle
 const albumCheckbox = document.getElementById('albumCheckbox') as HTMLInputElement;
 const submitButton = document.getElementById('submitButton') as HTMLInputElement;
 const skipButton = document.getElementById('skipButton') as HTMLButtonElement;
+const scoreElement = document.getElementById("score") as HTMLElement;
+const highscoreElement = document.getElementById("highscore") as HTMLElement;
+const livesElement = document.getElementById("lives") as HTMLElement;
+
 //#endregion
 
 //#region GAME LOGIC
 
 // Initialize the game by fetching a random song from the playlist
 async function initializeGame() {
+    if (!finishedRound) { 
+        loseLife(1) 
+        if (lives == 0) {
+            setLives(3)
+            setScore(0)
+        }
+    }
+    finishedRound = false
+
     let randomSong;
     if (artistCheckbox.checked) {
         randomSong = await fn.getRandomSongFromArtist("https://open.spotify.com/artist/" + artistId)
@@ -142,9 +158,83 @@ function addPlaylistToDropdown(playlistId: string, playlistName: string) {
         return; // Don't add duplicates to local storage
     }
     
-    storedPlaylists.push({ id: playlistId, name: playlistName });
+    storedPlaylists.push({ id: playlistId, name: playlistName, highscore: 0 });
     localStorage.setItem(dropdown, JSON.stringify(storedPlaylists));
 }
+
+//! SCORING
+// Function to update the displayed score
+function updateScoreDisplay() {
+  scoreElement.textContent = "scoreee: " + score.toString();
+}
+
+// Function to update the displayed highscore
+function updateHighscoreDisplay(highscore: number) {
+  highscoreElement.textContent = "best: " + highscore.toString();
+}
+
+// Function to update the highscore if the current score is higher
+function updateHighscore() {
+  const currentHighscore = getPlaylistHighscore(playlistId);
+  if (score > currentHighscore) {
+    updateHighscoreDisplay(score);
+    updatePlaylistHighscore(playlistId, score)
+  }
+}
+
+// Function to add to the score and update the highscore
+function addScore(num: number) {
+  score = score + num;
+  updateScoreDisplay();
+  updateHighscore();
+}
+
+function setScore(num: number) {
+  score = num;
+  updateScoreDisplay();
+}
+
+function setLives(num: number) {
+    lives = num
+    livesElement.textContent = "lives: " + lives.toString();
+}
+
+function loseLife(num: number) {
+    lives = lives - num
+    livesElement.textContent = "lives: " + lives.toString();
+}
+
+function getPlaylistHighscore(playlistId: string): number {
+    let dropdown = '';
+    if (playlistCheckbox.checked) dropdown = 'playlists';
+    else if (artistCheckbox.checked) dropdown = 'artists';
+    else if (albumCheckbox.checked) dropdown = 'albums';
+
+    const storedPlaylists = JSON.parse(localStorage.getItem(dropdown) || '[]');
+    const playlist = storedPlaylists.find((p: { id: string }) => p.id === playlistId);
+    return playlist ? playlist.highscore : 0;
+}
+
+function updatePlaylistHighscore(playlistId: string, newHighscore: number) {
+    let dropdown = '';
+    if (playlistCheckbox.checked) dropdown = 'playlists';
+    else if (artistCheckbox.checked) dropdown = 'artists';
+    else if (albumCheckbox.checked) dropdown = 'albums';
+
+    const storedPlaylists = JSON.parse(localStorage.getItem(dropdown) || '[]');
+    const playlistIndex = storedPlaylists.findIndex((p: { id: string }) => p.id === playlistId);
+
+    if (playlistIndex !== -1 && newHighscore > storedPlaylists[playlistIndex].highscore) {
+        storedPlaylists[playlistIndex].highscore = newHighscore;
+        localStorage.setItem(dropdown, JSON.stringify(storedPlaylists));
+    }
+}
+
+// Set up event listener for button click
+
+// Initialize highscore display
+updateHighscoreDisplay(0);
+
 
 //#endregion
 
@@ -271,11 +361,16 @@ removeOptionButton.addEventListener('click', () => {
 
 // Function to handle playlist selection change
 optionDropdown.addEventListener('change', async () => {
+    setScore(0)
+    setLives(4)
     const selectedPlaylistId = optionDropdown.value;
     if (selectedPlaylistId) {
         playlistId = selectedPlaylistId;
         artistId = selectedPlaylistId;
         albumId = selectedPlaylistId;
+
+        const playlistHighscore = getPlaylistHighscore(selectedPlaylistId);
+        updateHighscoreDisplay(playlistHighscore);
 
         if (playlistCheckbox.checked) {
             titleElement.innerText = "Welcome to Playlistle! The song guessing game??????"
@@ -382,6 +477,8 @@ function guessHelper(input: string) {
     // Correct guess
     if (userGuess === normalizedCorrectAnswer || userGuess === normalizedAnswerWithoutBrackets) {
         correctOrNotElement.innerText = "yep you got it";
+        addScore(30 - (guessCount * 10))
+        finishedRound = true
         guessInput.disabled = true;
         submitButton.disabled = true;
         skipButton.disabled = true;
@@ -429,6 +526,12 @@ function guessIterator() {
             break;
 
         case 3:
+            loseLife(1)
+            if (lives == 0) {
+                setLives(3)
+                setScore(0)
+            }
+            finishedRound = true
             correctOrNotElement.innerText = "damn that sucks";
             submitButton.disabled = true;
             skipButton.disabled = true;
