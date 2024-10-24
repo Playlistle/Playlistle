@@ -1,10 +1,9 @@
-// deno-lint-ignore-file no-explicit-any no-window no-window-prefix
+// deno-lint-ignore-file no-window no-window-prefix
 import * as fn from "./functions.ts"
 
 //#region VARIABLE DELCARATIONS
 
 // Global Variables
-let accessToken = '';
 let playlistId = '';
 let artistId = '';
 let albumId = '';
@@ -162,8 +161,8 @@ processUrlButton.addEventListener('click', async () => {
         playlistId = url.replace("https://open.spotify.com/playlist/", "").split("?")[0];
     
         // Fetch access token and playlist info
-        accessToken = await fn.getAccessToken();
-        const playlistData = await fn.fetchReference(accessToken, `playlists/${playlistId}`);
+        const playlistData = await fn.fetchReference(`playlists/${playlistId}`);
+        console.log(playlistId)
     
         // Check if playlistData has a valid name
         if (playlistData.name) {
@@ -187,8 +186,7 @@ processUrlButton.addEventListener('click', async () => {
         artistId = url.replace("https://open.spotify.com/artist/", "").split("?")[0];
     
         // Fetch access token and artist info
-        accessToken = await fn.getAccessToken();
-        const artistData = await fn.fetchReference(accessToken, `artists/${artistId}`);
+        const artistData = await fn.fetchReference(`artists/${artistId}`);
     
         // Check if artistData has a valid name
         if (artistData.name) {
@@ -211,8 +209,7 @@ processUrlButton.addEventListener('click', async () => {
         albumId = url.replace("https://open.spotify.com/album/", "").split("?")[0];
     
         // Fetch access token and artist info
-        accessToken = await fn.getAccessToken();
-        const albumData = await fn.fetchReference(accessToken, `albums/${albumId}`);
+        const albumData = await fn.fetchReference(`albums/${albumId}`);
     
         // Check if artistData has a valid name
         if (albumData.name) {
@@ -275,11 +272,6 @@ optionDropdown.addEventListener('change', async () => {
     const selectedPlaylistId = optionDropdown.value;
     if (selectedPlaylistId) {
         playlistId = selectedPlaylistId;
-
-        // Fetch access token if not already available
-        if (!accessToken) {
-            accessToken = await fn.getAccessToken();
-        }
 
         if (playlistCheckbox.checked) {
             titleElement.innerText = "Welcome to Playlistle! The song guessing game??????"

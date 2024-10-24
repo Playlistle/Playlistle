@@ -1,5 +1,5 @@
-const clientId = import.meta.env.VITE_API_KEY;
-const clientSecret = import.meta.env.VITE_API_SECRET;
+// deno-lint-ignore-file no-explicit-any
+import { Client, Functions, ExecutionMethod } from "npm:appwrite";
 
 //#region INTERFACES
 
@@ -41,33 +41,27 @@ interface RandomSong {
 
 //#region ACCESS TOKEN FUNCTIONS
 
-// Fetch Spotify access token using client credentials
-export async function getAccessToken(): Promise<string> {
-    const url = 'https://accounts.spotify.com/api/token';
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-            'Authorization': 'Basic ' + btoa(clientId + ':' + clientSecret),
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: 'grant_type=client_credentials',
-    });
-    if (response.ok) {
-        const jsonResponse = await response.json();
-        return jsonResponse.access_token;
-    } else {
-        console.error(response.statusText);
-        throw new Error(`Request failed! Status code: ${response.status} ${response.statusText}`);
-    }
-}
+// Fetch data from backend
+export async function fetchReference(reference: string): Promise<any> {
+    
+    const client = new Client();
 
-// Fetch data from Spotify API
-export async function fetchReference(token: string, reference: string): Promise<any> {
-    const result = await fetch(`https://api.spotify.com/v1/${reference}`, {
-        method: "GET",
-        headers: { Authorization: `Bearer ${token}` }
-    });
-    return await result.json();
+    await client
+        .setProject('67183945001faccf6f50') 
+        .setEndpoint('https://cloud.appwrite.io/v1')
+        
+    const functions = new Functions(client);
+
+    const promise = await functions.createExecution(
+        '67187c7e002b2aaba4af',
+        '',
+        false,
+        reference,
+        ExecutionMethod.GET
+    );
+
+    const out = JSON.parse(promise.responseBody)
+    return out
 }
 
 //#endregion
@@ -124,7 +118,7 @@ export function levenshteinDistance(a: string, b: string): number {
 
 // Get random song info from Spotify artist URL
 export async function getRandomSongFromArtist(artistUrl: string) {
-    const accessToken = await getAccessToken();
+
     if (!artistUrl.startsWith("https://open.spotify.com/artist/")) {
         alert("Please enter a valid Spotify Artist URL.");
         return;
@@ -141,8 +135,7 @@ export async function getRandomSongFromArtist(artistUrl: string) {
 
     // Fetch albums with pagination to collect all albums
     do {
-        const artistAlbums = await fetchReference(accessToken, `artists/${artistUrl}/albums?limit=${limit}&offset=${offset}`);
-        console.log(artistAlbums);
+        const artistAlbums = await fetchReference(`artists/${artistUrl}/albums?limit=${limit}&offset=${offset}`);
         albums = albums.concat(artistAlbums.items as Album[]);
         totalAlbums = artistAlbums.total;
         offset += limit;
@@ -157,7 +150,7 @@ export async function getRandomSongFromArtist(artistUrl: string) {
 
     // Fetch tracks for multiple albums at once, using the batches
     for (const batch of albumBatches) {
-        const albumsData = await fetchReference(accessToken, `albums?ids=${batch}`);
+        const albumsData = await fetchReference(`albums?ids=${batch}`);
         for (const album of albumsData.albums as Album[]) {
             for (const track of album.tracks.items) {
                 // Ensure the track belongs to the artist
@@ -197,7 +190,6 @@ export async function getRandomSongFromPlaylist(playlistUrl: string) {
     let validSongFound = false;
     let attempts = 0;
 
-    const accessToken = await getAccessToken();
     if (!playlistUrl.startsWith("https://open.spotify.com/playlist/")) {
         alert("Please enter a valid Spotify Playlist URL.");
         return;
@@ -205,12 +197,14 @@ export async function getRandomSongFromPlaylist(playlistUrl: string) {
 
     playlistUrl = playlistUrl.replace("https://open.spotify.com/playlist/", "").split("?")[0];
 
-    const playlistSongs = await fetchReference(accessToken, `playlists/${playlistUrl}/tracks`);
+    const playlistSongs = await fetchReference(`playlists/${playlistUrl}/tracks`);
 
     while (!validSongFound && attempts < 5) {
         attempts++;
 
-        const randomSongInfo = await fetchReference(accessToken, `playlists/${playlistUrl}/tracks?limit=1&offset=${Math.floor(Math.random() * playlistSongs.total)}`);
+        const randomSongInfo = await fetchReference(`playlists/${playlistUrl}/tracks?limit=1&offset=${Math.floor(Math.random() * playlistSongs.total)}`);
+        
+        console.log(randomSongInfo)
         const track = randomSongInfo.items[0].track
 
         if (track.preview_url) {
@@ -243,7 +237,6 @@ export async function getRandomSongFromPlaylist(playlistUrl: string) {
 // Get random song info from Spotify playlist URL
 export async function getRandomSongFromAlbum(albumUrl: string) {
 
-    const accessToken = await getAccessToken();
     if (!albumUrl.startsWith("https://open.spotify.com/album/")) {
         alert("Please enter a valid Spotify Album URL.");
         return;
@@ -251,10 +244,10 @@ export async function getRandomSongFromAlbum(albumUrl: string) {
 
     albumUrl = albumUrl.replace("https://open.spotify.com/album/", "").split("?")[0];
 
-    const albumInfo = await fetchReference(accessToken, `albums/${albumUrl}`);
-    const albumSongs = await fetchReference(accessToken, `albums/${albumUrl}/tracks`);
+    const albumInfo = await fetchReference(`albums/${albumUrl}`);
+    const albumSongs = await fetchReference(`albums/${albumUrl}/tracks`);
 
-    const randomSongInfo = await fetchReference(accessToken, `albums/${albumUrl}/tracks?limit=1&offset=${Math.floor(Math.random() * albumSongs.total)}`);
+    const randomSongInfo = await fetchReference(`albums/${albumUrl}/tracks?limit=1&offset=${Math.floor(Math.random() * albumSongs.total)}`);
     const track = randomSongInfo.items[0];
 
     const randomSong: RandomSong = {
