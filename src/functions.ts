@@ -1,6 +1,15 @@
 // deno-lint-ignore-file no-explicit-any
 import { Client, Functions, ExecutionMethod } from "npm:appwrite";
 
+//#region VARIABLES
+
+let currentPlaylistUrl: any;
+let playlistSongs: any;
+let currentAlbumUrl: any;
+let albumInfo: any;
+
+//#endregion
+
 //#region INTERFACES
 
 // Define interfaces for Spotify API responses
@@ -197,14 +206,15 @@ export async function getRandomSongFromPlaylist(playlistUrl: string) {
 
     playlistUrl = playlistUrl.replace("https://open.spotify.com/playlist/", "").split("?")[0];
 
-    const playlistSongs = await fetchReference(`playlists/${playlistUrl}/tracks`);
+    if (currentPlaylistUrl !== playlistUrl) {
+        playlistSongs = await fetchReference(`playlists/${playlistUrl}/tracks`);
+    }
+    currentPlaylistUrl = playlistUrl
 
     while (!validSongFound && attempts < 5) {
         attempts++;
 
         const randomSongInfo = await fetchReference(`playlists/${playlistUrl}/tracks?limit=1&offset=${Math.floor(Math.random() * playlistSongs.total)}`);
-        
-        console.log(randomSongInfo)
         const track = randomSongInfo.items[0].track
 
         if (track.preview_url) {
@@ -236,7 +246,6 @@ export async function getRandomSongFromPlaylist(playlistUrl: string) {
 
 // Get random song info from Spotify playlist URL
 export async function getRandomSongFromAlbum(albumUrl: string) {
-
     if (!albumUrl.startsWith("https://open.spotify.com/album/")) {
         alert("Please enter a valid Spotify Album URL.");
         return;
@@ -244,10 +253,12 @@ export async function getRandomSongFromAlbum(albumUrl: string) {
 
     albumUrl = albumUrl.replace("https://open.spotify.com/album/", "").split("?")[0];
 
-    const albumInfo = await fetchReference(`albums/${albumUrl}`);
-    const albumSongs = await fetchReference(`albums/${albumUrl}/tracks`);
+    if (currentAlbumUrl !== albumUrl) {
+        albumInfo = await fetchReference(`albums/${albumUrl}`);
+    }
+    currentAlbumUrl = albumUrl
 
-    const randomSongInfo = await fetchReference(`albums/${albumUrl}/tracks?limit=1&offset=${Math.floor(Math.random() * albumSongs.total)}`);
+    const randomSongInfo = await fetchReference(`albums/${albumUrl}/tracks?limit=1&offset=${Math.floor(Math.random() * albumInfo.total_tracks - 1)}`);
     const track = randomSongInfo.items[0];
 
     const randomSong: RandomSong = {

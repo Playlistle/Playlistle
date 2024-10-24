@@ -166,7 +166,6 @@ processUrlButton.addEventListener('click', async () => {
     
         // Fetch access token and playlist info
         const playlistData = await fn.fetchReference(`playlists/${playlistId}`);
-        console.log(playlistId)
     
         // Check if playlistData has a valid name
         if (playlistData.name) {
@@ -203,7 +202,6 @@ processUrlButton.addEventListener('click', async () => {
         }
     } else if (albumCheckbox.checked) {
         // Process Album
-
         if (!url.includes("https://open.spotify.com/album/")) {
             alert("Please enter a valid Spotify Album URL.");
             return;
@@ -276,6 +274,8 @@ optionDropdown.addEventListener('change', async () => {
     const selectedPlaylistId = optionDropdown.value;
     if (selectedPlaylistId) {
         playlistId = selectedPlaylistId;
+        artistId = selectedPlaylistId;
+        albumId = selectedPlaylistId;
 
         if (playlistCheckbox.checked) {
             titleElement.innerText = "Welcome to Playlistle! The song guessing game??????"
