@@ -163,15 +163,16 @@ function addPlaylistToDropdown(playlistId: string, playlistName: string) {
     localStorage.setItem(dropdown, JSON.stringify(storedPlaylists));
 }
 
-//! SCORING
+//#region SCORING
+
 // Function to update the displayed score
 function updateScoreDisplay() {
-  scoreElement.textContent = "scoreee: " + score.toString();
+  scoreElement.textContent = `scoreee: ${score}`;
 }
 
 // Function to update the displayed highscore
 function updateHighscoreDisplay(highscore: number) {
-  highscoreElement.textContent = "best: " + highscore.toString();
+  highscoreElement.textContent = `best: ${highscore}`;
 }
 
 // Function to update the highscore if the current score is higher

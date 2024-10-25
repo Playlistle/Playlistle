@@ -3,6 +3,7 @@
   "packages": {
     "specifiers": {
       "npm:@deno/vite-plugin@^1.0.0": "npm:@deno/vite-plugin@1.0.0_vite@5.4.9",
+      "npm:appwrite": "npm:appwrite@16.0.2",
       "npm:create-vite-extra@latest": "npm:create-vite-extra@2.3.0",
       "npm:vite": "npm:vite@5.4.9",
       "npm:vite@^5.4.8": "npm:vite@5.4.9"
@@ -172,6 +173,10 @@
       },
       "@types/estree@1.0.6": {
         "integrity": "sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw==",
+        "dependencies": {}
+      },
+      "appwrite@16.0.2": {
+        "integrity": "sha512-sCMVOe9wdB8OneIz6LtoYhp797GEXoudAdygNZgezPiybGOlMPcQ8kP1c/FW1eES0ledaqgaZ0PHb+LwZia8pw==",
         "dependencies": {}
       },
       "create-vite-extra@2.3.0": {
