@@ -24,6 +24,7 @@ interface Album {
 
 interface Track {
     preview_url: string;
+    external_urls: string[];
     artists: Artist[];
     name: string;
 }
@@ -39,6 +40,7 @@ interface Images {
 
 interface RandomSong {
     preview_url: string | undefined;
+    main_url: string | undefined;
     name: string | undefined;
     artists: string | undefined;
     image: string | undefined;
@@ -167,6 +169,7 @@ export async function getRandomSongFromArtist(artistUrl: string) {
                     artistSongUrls.push({
                         artists: track.artists.map(artist => artist.name).join(', '),
                         preview_url: track.preview_url,
+                        main_url: track.external_urls['spotify'],
                         image: album.images[0].url,
                         name: track.name
                     });
@@ -223,6 +226,7 @@ export async function getRandomSongFromPlaylist(playlistUrl: string) {
             const randomSong: RandomSong = {
                 artists: track.artists.map((artist: Artist) => artist.name).join(', '),
                 preview_url: track.preview_url,
+                main_url: track.external_urls['spotify'],
                 image: track.album.images[0].url,
                 name: track.name,
                 viable_source: true
@@ -235,6 +239,7 @@ export async function getRandomSongFromPlaylist(playlistUrl: string) {
             const randomSong: RandomSong = {
                 artists: undefined,
                 preview_url: undefined,
+                main_url: undefined,
                 image: undefined,
                 name: undefined,
                 viable_source: false
@@ -264,6 +269,7 @@ export async function getRandomSongFromAlbum(albumUrl: string) {
     const randomSong: RandomSong = {
         artists: track.artists.map((artist: Artist) => artist.name).join(', '),
         preview_url: track.preview_url,
+        main_url: track.external_urls['spotify'],
         image: albumInfo.images[0].url,
         name: track.name
     };

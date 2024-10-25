@@ -72,6 +72,7 @@ async function initializeGame() {
     // Update UI elements with song details
     correctAnswer = randomSong?.name as string;
     songInfoElement.innerText = `${randomSong?.artists as string} - ${randomSong?.name as string}`;
+    songInfoElement.setAttribute("href", randomSong.main_url as string);
     imageUrlElement.setAttribute("src", randomSong?.image as string);
 
     // Hide the cover and song name
@@ -162,15 +163,16 @@ function addPlaylistToDropdown(playlistId: string, playlistName: string) {
     localStorage.setItem(dropdown, JSON.stringify(storedPlaylists));
 }
 
-//! SCORING
+//#region SCORING
+
 // Function to update the displayed score
 function updateScoreDisplay() {
-  scoreElement.textContent = "scoreee: " + score.toString();
+  scoreElement.textContent = `scoreee: ${score}`;
 }
 
 // Function to update the displayed highscore
 function updateHighscoreDisplay(highscore: number) {
-  highscoreElement.textContent = "best: " + highscore.toString();
+  highscoreElement.textContent = `best: ${highscore}`;
 }
 
 // Function to update the highscore if the current score is higher
