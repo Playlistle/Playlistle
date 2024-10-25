@@ -72,7 +72,7 @@ async function initializeGame() {
     // Update UI elements with song details
     correctAnswer = randomSong?.name as string;
     songInfoElement.innerText = `${randomSong?.artists as string} - ${randomSong?.name as string}`;
-    songInfoElement.setAttribute("href", randomSong.main_url as string);
+    songInfoElement.setAttribute("href", randomSong?.main_url as string);
     imageUrlElement.setAttribute("src", randomSong?.image as string);
 
     // Hide the cover and song name
@@ -363,8 +363,8 @@ removeOptionButton.addEventListener('click', () => {
 
 // Function to handle playlist selection change
 optionDropdown.addEventListener('change', async () => {
-    setScore(0)
-    setLives(4)
+    setScore(0);
+    setLives(3);
     const selectedPlaylistId = optionDropdown.value;
     if (selectedPlaylistId) {
         playlistId = selectedPlaylistId;
