@@ -451,6 +451,15 @@ albumCheckbox.addEventListener('click', () => {
 
 // Load playlists from local storage when the page is loaded
 window.addEventListener('load', () => {
+    playlistCheckbox.checked = true;
+    playlistCheckbox.disabled = true;
+    artistCheckbox.checked = false;
+    artistCheckbox.disabled = false;
+    albumCheckbox.checked = false;
+    albumCheckbox.disabled = false;
+
+    gamemode = "playlists";
+
     loadPlaylistsFromLocalStorage();
 });
 //#endregion
