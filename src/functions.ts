@@ -130,64 +130,16 @@ export function levenshteinDistance(a: string, b: string): number {
 }
 
 export function setupAutocomplete() {
-    const inputElement = document.getElementById("guessInput") as HTMLInputElement;
-    const listElement = document.getElementById("autocomplete-list") as HTMLUListElement;
+    const datalistElement = document.getElementById("autocomplete-list") as HTMLDataListElement;
+    datalistElement.innerHTML = "";
+    let datalistHTML = "";
 
-    inputElement.addEventListener("input", () => {
-        const query = inputElement.value.toLowerCase();
-        listElement.innerHTML = "";
-        currentFocus = -1; // Reset focus
-
-        if (query) {
-            const filteredOptions = cachedSongs.filter(option =>
-                option.toLowerCase().includes(query)
-            );
-
-            filteredOptions.forEach(option => {
-                const listItem = document.createElement("li");
-                listItem.textContent = option;
-
-                listItem.addEventListener("click", () => {
-                    inputElement.value = option;
-                    listElement.innerHTML = "";
-                });
-
-                listElement.appendChild(listItem);
-            });
-        }
-    });
-
-    // Check the user's guess when they press Enter in the input field
-    inputElement.addEventListener("keydown", (e) => {
-        const items = listElement.getElementsByTagName("li");
-        if (e.key === "ArrowDown") {
-            currentFocus++;
-            addActive(items);
-        } else if (e.key === "ArrowUp") {
-            currentFocus--;
-            addActive(items);
-        } else if (e.key === "Enter") {
-            e.preventDefault();
-            if (currentFocus > -1 && items[currentFocus]) {
-                items[currentFocus].click();
-                guessHelper(inputElement.value)
-            }
-        }
-    });
-
-    function addActive(items: HTMLCollectionOf<HTMLLIElement>) {
-        if (!items) return;
-        removeActive(items);
-        if (currentFocus >= items.length) currentFocus = 0;
-        if (currentFocus < 0) currentFocus = items.length - 1;
-        items[currentFocus].classList.add("active");
+    for (let song of cachedSongs) {
+        datalistHTML += `<option value="${song}"></option>`;
     }
 
-    function removeActive(items: HTMLCollectionOf<HTMLLIElement>) {
-        for (let i = 0; i < items.length; i++) {
-            items[i].classList.remove("active");
-        }
-    }
+    datalistElement.innerHTML = datalistHTML;
+    console.log(datalistElement);
 }
 
 //#endregion

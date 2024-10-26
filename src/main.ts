@@ -120,6 +120,8 @@ async function initializeGame() {
     }
 
     isGettingSource = false
+
+    fn.setupAutocomplete()
 }
 
 // Function to play audio and pause after a given duration
@@ -233,7 +235,6 @@ function updatePlaylistHighscore(playlistId: string, newHighscore: number) {
 
 // Initialize highscore display
 updateHighscoreDisplay(0);
-fn.setupAutocomplete()
 
 //#endregion
 

@@ -46,7 +46,7 @@ h1, h2, h3, label {
 
 /* autocomplete */
 
-.autocomplete-container {
+/* .autocomplete-container {
     justify-content: center;
     position: relative;
     width: 160px;
@@ -83,4 +83,4 @@ h1, h2, h3, label {
 .autocomplete-list li.active {
     background-color: #0073e6;
     color: #fff;
-}
+} */

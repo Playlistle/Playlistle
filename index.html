@@ -64,8 +64,10 @@
             <button id="replayButton">wait play it again</button>
             <label id="inputLabel" for="guessInput">guess 1 (0.5 seconds):</label>
             <div class="autocomplete-container">
-              <input id="guessInput" type="text" placeholder="enter your guess here..." autocomplete="off"/>
-              <ul id="autocomplete-list" class="autocomplete-list"></ul>
+              <input id="guessInput" type="text" placeholder="enter your guess here..." autocomplete="off" list="autocomplete-list"/>
+              <datalist id="autocomplete-list">
+                <option value="This is a placeholder option!"></option>
+              </datalist>
             </div>
             <button id="submitButton" disabled="true">submit that</button>
             <button id="skipButton" disabled="true">nah skip that</button>
