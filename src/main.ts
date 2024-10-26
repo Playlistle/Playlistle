@@ -8,6 +8,7 @@ let playlistId = '';
 let artistId = '';
 let albumId = '';
 let correctAnswer = '';
+let storageType = 'playlists';
 let guessCount: number;
 let startTime: number;
 let startTime1: number;
@@ -153,20 +154,15 @@ function addPlaylistToDropdown(playlistId: string, playlistName: string) {
     option.text = playlistName;
     optionDropdown.add(option);
 
-    let dropdown = "";
-    if (playlistCheckbox.checked) dropdown = "playlists";
-    else if (artistCheckbox.checked) dropdown = "artists";
-    else if (albumCheckbox.checked) dropdown = "albums";
-
     // Store the playlist in local storage
-    const storedPlaylists = JSON.parse(localStorage.getItem(dropdown) || '[]');
+    const storedPlaylists = JSON.parse(localStorage.getItem(storageType) || '[]');
     const isPlaylistStored = storedPlaylists.some((playlist: { id: string }) => playlist.id === playlistId);
     if (isPlaylistStored) {
         return; // Don't add duplicates to local storage
     }
 
     storedPlaylists.push({ id: playlistId, name: playlistName, highscore: 0 });
-    localStorage.setItem(dropdown, JSON.stringify(storedPlaylists));
+    localStorage.setItem(storageType, JSON.stringify(storedPlaylists));
 }
 
 //#region SCORING
@@ -213,28 +209,18 @@ function loseLife(num: number) {
 }
 
 function getPlaylistHighscore(playlistId: string): number {
-    let dropdown = '';
-    if (playlistCheckbox.checked) dropdown = 'playlists';
-    else if (artistCheckbox.checked) dropdown = 'artists';
-    else if (albumCheckbox.checked) dropdown = 'albums';
-
-    const storedPlaylists = JSON.parse(localStorage.getItem(dropdown) || '[]');
+    const storedPlaylists = JSON.parse(localStorage.getItem(storageType) || '[]');
     const playlist = storedPlaylists.find((p: { id: string }) => p.id === playlistId);
     return playlist ? playlist.highscore : 0;
 }
 
 function updatePlaylistHighscore(playlistId: string, newHighscore: number) {
-    let dropdown = '';
-    if (playlistCheckbox.checked) dropdown = 'playlists';
-    else if (artistCheckbox.checked) dropdown = 'artists';
-    else if (albumCheckbox.checked) dropdown = 'albums';
-
-    const storedPlaylists = JSON.parse(localStorage.getItem(dropdown) || '[]');
+    const storedPlaylists = JSON.parse(localStorage.getItem(storageType) || '[]');
     const playlistIndex = storedPlaylists.findIndex((p: { id: string }) => p.id === playlistId);
 
     if (playlistIndex !== -1 && newHighscore > storedPlaylists[playlistIndex].highscore) {
         storedPlaylists[playlistIndex].highscore = newHighscore;
-        localStorage.setItem(dropdown, JSON.stringify(storedPlaylists));
+        localStorage.setItem(storageType, JSON.stringify(storedPlaylists));
     }
 }
 
@@ -338,17 +324,6 @@ removeOptionButton.addEventListener('click', () => {
         optionDropdown.removeChild(selectedOption);
     }
 
-    // Check where item is being stored
-    let storageType = '';
-
-    if (playlistCheckbox.checked) {
-        storageType = 'playlists';
-    } else if (artistCheckbox.checked) {
-        storageType = 'artists';
-    } else if (albumCheckbox.checked) {
-        storageType = 'albums';
-    }
-
     // Remove from local storage
     const storedOptions = JSON.parse(localStorage.getItem(storageType) || '[]');
     let updatedOptions;
@@ -375,18 +350,23 @@ optionDropdown.addEventListener('change', () => {
     setLives(4);
     const selectedPlaylistId = optionDropdown.value;
     if (selectedPlaylistId) {
-        playlistId = selectedPlaylistId;
-        artistId = selectedPlaylistId;
-        albumId = selectedPlaylistId;
+        switch (storageType) {
+            case 'playlists': 
+                playlistId = selectedPlaylistId;
+                titleElement.innerText = "Welcome to Playlistle! The song guessing game??????"
+                break;
+            case 'artists':
+                artistId = selectedPlaylistId;
+                titleElement.innerText = "Welcome to " + optionDropdown.options[optionDropdown.selectedIndex].innerText + "le! The song guessing game??????"
+                break;
+            case 'albums':
+                albumId = selectedPlaylistId;
+                titleElement.innerText = "Welcome to " + optionDropdown.options[optionDropdown.selectedIndex].innerText + "le! The song guessing game??????"
+                break;
+        }
 
         const playlistHighscore = getPlaylistHighscore(selectedPlaylistId);
         updateHighscoreDisplay(playlistHighscore);
-
-        if (playlistCheckbox.checked) {
-            titleElement.innerText = "Welcome to Playlistle! The song guessing game??????"
-        } else if (artistCheckbox.checked || albumCheckbox.checked) {
-            titleElement.innerText = "Welcome to " + optionDropdown.options[optionDropdown.selectedIndex].innerText + "le! The song guessing game??????"
-        }
 
         // Initialize the game with the selected playlist
         initializeGame();
@@ -423,6 +403,8 @@ playlistCheckbox.addEventListener('click', () => {
     albumCheckbox.disabled = false;
     albumCheckbox.checked = false;
 
+    storageType = "playlists";
+
     playlistCheckbox.disabled = true;
 
     urlInput.placeholder = "https://open.spotify.com/playlist/...";
@@ -437,6 +419,8 @@ artistCheckbox.addEventListener('click', () => {
     albumCheckbox.disabled = false;
     albumCheckbox.checked = false;
 
+    storageType = "artists";
+
     artistCheckbox.disabled = true;
 
     urlInput.placeholder = "https://open.spotify.com/artist/...";
@@ -450,6 +434,8 @@ albumCheckbox.addEventListener('click', () => {
     playlistCheckbox.checked = false;
     artistCheckbox.disabled = false;
     artistCheckbox.checked = false;
+
+    storageType = "albums";
 
     albumCheckbox.disabled = true;
 
@@ -567,21 +553,24 @@ function loadPlaylistsFromLocalStorage() {
     optionDropdown.innerHTML = ''; // Clears all options
     optionDropdown.add(placeholderOption); // Re-add the placeholder option
 
-    if (playlistCheckbox.checked) {
-        const storedPlaylists = JSON.parse(localStorage.getItem('playlists') || '[]');
-        storedPlaylists.forEach((playlist: { id: string, name: string }) => {
-            addPlaylistToDropdown(playlist.id, playlist.name);
-        });
-    } else if (artistCheckbox.checked) {
-        const storedArtists = JSON.parse(localStorage.getItem('artists') || '[]');
-        storedArtists.forEach((artist: { id: string, name: string }) => {
-            addPlaylistToDropdown(artist.id, artist.name);
-        });
-    } else if (albumCheckbox.checked) {
-        const storedAlbums = JSON.parse(localStorage.getItem('albums') || '[]');
-        storedAlbums.forEach((album: { id: string, name: string }) => {
-            addPlaylistToDropdown(album.id, album.name);
-        });
+    const storedCollections = JSON.parse(localStorage.getItem(storageType) || '[]');
+
+    switch (storageType) {
+        case 'playlists': 
+            storedCollections.forEach((playlist: { id: string, name: string }) => {
+                addPlaylistToDropdown(playlist.id, playlist.name);
+            });
+            break;
+        case 'artists':
+            storedCollections.forEach((artist: { id: string, name: string }) => {
+                addPlaylistToDropdown(artist.id, artist.name);
+            });
+            break;
+        case 'albums':
+            storedCollections.forEach((album: { id: string, name: string }) => {
+                addPlaylistToDropdown(album.id, album.name);
+            });
+            break;
     }
 }
 
