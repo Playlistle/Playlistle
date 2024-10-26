@@ -1,12 +1,18 @@
 // deno-lint-ignore-file no-explicit-any
 import { Client, Functions, ExecutionMethod } from "npm:appwrite";
+import { guessHelper } from "./main.ts";
 
 //#region VARIABLES
 
 let currentPlaylistUrl: any;
 let playlistSongs: any;
 let currentAlbumUrl: any;
+let currentArtistUrl: any;
+let artistSongUrls: RandomSong[] = [];
 let albumInfo: any;
+let cachedSongs: string[] = [];
+let currentFocus = -1;
+let currentSourceUrl = "";
 
 //#endregion
 
@@ -54,13 +60,13 @@ interface RandomSong {
 
 // Fetch data from backend
 export async function fetchReference(reference: string): Promise<any> {
-    
+
     const client = new Client();
 
     await client
-        .setProject('67183945001faccf6f50') 
+        .setProject('67183945001faccf6f50')
         .setEndpoint('https://cloud.appwrite.io/v1')
-        
+
     const functions = new Functions(client);
 
     const promise = await functions.createExecution(
@@ -123,6 +129,67 @@ export function levenshteinDistance(a: string, b: string): number {
     return matrix[b.length][a.length];
 }
 
+export function setupAutocomplete() {
+    const inputElement = document.getElementById("guessInput") as HTMLInputElement;
+    const listElement = document.getElementById("autocomplete-list") as HTMLUListElement;
+
+    inputElement.addEventListener("input", () => {
+        const query = inputElement.value.toLowerCase();
+        listElement.innerHTML = "";
+        currentFocus = -1; // Reset focus
+
+        if (query) {
+            const filteredOptions = cachedSongs.filter(option =>
+                option.toLowerCase().includes(query)
+            );
+
+            filteredOptions.forEach(option => {
+                const listItem = document.createElement("li");
+                listItem.textContent = option;
+
+                listItem.addEventListener("click", () => {
+                    inputElement.value = option;
+                    listElement.innerHTML = "";
+                });
+
+                listElement.appendChild(listItem);
+            });
+        }
+    });
+
+    // Check the user's guess when they press Enter in the input field
+    inputElement.addEventListener("keydown", (e) => {
+        const items = listElement.getElementsByTagName("li");
+        if (e.key === "ArrowDown") {
+            currentFocus++;
+            addActive(items);
+        } else if (e.key === "ArrowUp") {
+            currentFocus--;
+            addActive(items);
+        } else if (e.key === "Enter") {
+            e.preventDefault();
+            if (currentFocus > -1 && items[currentFocus]) {
+                items[currentFocus].click();
+                guessHelper(inputElement.value)
+            }
+        }
+    });
+
+    function addActive(items: HTMLCollectionOf<HTMLLIElement>) {
+        if (!items) return;
+        removeActive(items);
+        if (currentFocus >= items.length) currentFocus = 0;
+        if (currentFocus < 0) currentFocus = items.length - 1;
+        items[currentFocus].classList.add("active");
+    }
+
+    function removeActive(items: HTMLCollectionOf<HTMLLIElement>) {
+        for (let i = 0; i < items.length; i++) {
+            items[i].classList.remove("active");
+        }
+    }
+}
+
 //#endregion
 
 //#region RANDOM SONG FUNCTIONS
@@ -138,50 +205,54 @@ export async function getRandomSongFromArtist(artistUrl: string) {
     artistUrl = artistUrl.replace("https://open.spotify.com/artist/", "").split("?")[0];
 
     // Explicitly define the type for albums
-    let artistSongUrls: RandomSong[] = [];
     let albums: Album[] = [];
     let offset = 0;
     const limit = 50; // Max limit for album fetches
     let totalAlbums = 0;
 
     // Fetch albums with pagination to collect all albums
-    do {
-        const artistAlbums = await fetchReference(`artists/${artistUrl}/albums?limit=${limit}&offset=${offset}`);
-        albums = albums.concat(artistAlbums.items as Album[]);
-        totalAlbums = artistAlbums.total;
-        offset += limit;
-    } while (offset < totalAlbums);
+    if (currentArtistUrl !== artistUrl) {
+        do {
+            const artistAlbums = await fetchReference(`artists/${artistUrl}/albums?limit=${limit}&offset=${offset}`);
+            console.log("yikers")
+            albums = albums.concat(artistAlbums.items as Album[]);
+            totalAlbums = artistAlbums.total;
+            offset += limit;
+        } while (offset < totalAlbums);
 
-    // Group albums into batches of 20 IDs
-    const albumIds = albums.map(album => album.id);
-    const albumBatches: string[] = [];
-    for (let i = 0; i < albumIds.length; i += 20) {
-        albumBatches.push(albumIds.slice(i, i + 20).join(","));
-    }
+        // Group albums into batches of 20 IDs
+        const albumIds = albums.map(album => album.id);
+        const albumBatches: string[] = [];
+        for (let i = 0; i < albumIds.length; i += 20) {
+            albumBatches.push(albumIds.slice(i, i + 20).join(","));
+        }
 
-    // Fetch tracks for multiple albums at once, using the batches
-    for (const batch of albumBatches) {
-        const albumsData = await fetchReference(`albums?ids=${batch}`);
-        for (const album of albumsData.albums as Album[]) {
-            for (const track of album.tracks.items) {
-                // Ensure the track belongs to the artist
-                if (track.artists.some(artist => artist.id === artistUrl)) {
-                    artistSongUrls.push({
-                        artists: track.artists.map(artist => artist.name).join(', '),
-                        preview_url: track.preview_url,
-                        main_url: track.external_urls['spotify'],
-                        image: album.images[0].url,
-                        name: track.name
-                    });
+        // Fetch tracks for multiple albums at once, using the batches
+        for (const batch of albumBatches) {
+            const albumsData = await fetchReference(`albums?ids=${batch}`);
+            console.log("yikers")
+            for (const album of albumsData.albums as Album[]) {
+                for (const track of album.tracks.items) {
+                    // Ensure the track belongs to the artist
+                    if (track.artists.some(artist => artist.id === artistUrl)) {
+                        artistSongUrls.push({
+                            artists: track.artists.map(artist => artist.name).join(', '),
+                            preview_url: track.preview_url,
+                            main_url: track.external_urls[0],
+                            image: album.images[0].url,
+                            name: track.name
+                        });
+                    }
                 }
             }
         }
     }
+    currentArtistUrl = artistUrl
 
     const initialCount = artistSongUrls.length;
     artistSongUrls = artistSongUrls.filter(song => song.preview_url !== undefined);
     const filteredCount = initialCount - artistSongUrls.length;
-    
+
     const uniqueSongsMap = new Map<string, RandomSong>();
     for (const song of artistSongUrls) {
         const key = `${song.name}-${song.artists}`; // Create a unique key
@@ -189,8 +260,16 @@ export async function getRandomSongFromArtist(artistUrl: string) {
             uniqueSongsMap.set(key, song); // Store the song if it's not already in the map
         }
     }
-    
+
     artistSongUrls = Array.from(uniqueSongsMap.values());
+
+    if (currentSourceUrl !== artistUrl) {
+        cachedSongs = []
+        for (const song of artistSongUrls) {
+            cachedSongs.push(song.name as string)
+        }
+        currentSourceUrl = artistUrl
+    }
 
     const randomSong = artistSongUrls[Math.floor(Math.random() * artistSongUrls.length)];
     randomSong.filtered_songs = filteredCount

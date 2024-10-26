@@ -18,6 +18,8 @@ let guesses: string[];
 let score = 0;
 let lives = 3;
 let finishedRound = false;
+let isPlaying = false;
+let isGettingSource = false;
 
 // Get HTML Elements
 const titleElement = document.getElementById('title') as HTMLElement;
@@ -51,8 +53,8 @@ const livesElement = document.getElementById("lives") as HTMLElement;
 
 // Initialize the game by fetching a random song from the playlist
 async function initializeGame() {
-    if (!finishedRound) { 
-        loseLife(1) 
+    if (!finishedRound) {
+        loseLife(1)
         if (lives == 0) {
             setLives(3)
             setScore(0)
@@ -68,7 +70,7 @@ async function initializeGame() {
     } else if (albumCheckbox.checked) {
         randomSong = await fn.getRandomSongFromAlbum("https://open.spotify.com/album/" + albumId)
     }
-    
+
     // Update UI elements with song details
     correctAnswer = randomSong?.name as string;
     songInfoElement.innerText = `${randomSong?.artists as string} - ${randomSong?.name as string}`;
@@ -93,7 +95,7 @@ async function initializeGame() {
     songLength = 0.5;
 
     // Set up audio preview
-    sourceElement.src = randomSong?.preview_url as string;
+    sourceElement.src = await randomSong?.preview_url as string;
     audioElement.load();
 
     startTime = Math.random() * 29; // Random start time for audio
@@ -101,7 +103,7 @@ async function initializeGame() {
 
     // Play audio and pause after a short duration
     audioElement.addEventListener('loadedmetadata', () => {
-        playAndPauseAudio(songLength); // Play for 0.5 seconds by default
+        playAndPauseAudio(songLength, startTime); // Play for 0.5 seconds by default
     });
 
     // If after 5 attempts no valid song is found, show an error
@@ -111,10 +113,13 @@ async function initializeGame() {
         imageUrlElement.setAttribute("src", ""); // Clear any image
     }
 
+    isGettingSource = false
 }
 
 // Function to play audio and pause after a given duration
 function playAndPauseAudio(duration: number, overrideStartTime?: number) {
+    if (isPlaying) return; // Exit if audio is already playing
+    isPlaying = true;
     if (startTime < 30) {
         audioElement.currentTime = startTime;
     }
@@ -125,6 +130,7 @@ function playAndPauseAudio(duration: number, overrideStartTime?: number) {
 
     setTimeout(() => {
         audioElement.pause();
+        isPlaying = false;
     }, duration * 1000);
 }
 
@@ -146,7 +152,7 @@ function addPlaylistToDropdown(playlistId: string, playlistName: string) {
     option.value = playlistId;
     option.text = playlistName;
     optionDropdown.add(option);
-    
+
     let dropdown = "";
     if (playlistCheckbox.checked) dropdown = "playlists";
     else if (artistCheckbox.checked) dropdown = "artists";
@@ -158,7 +164,7 @@ function addPlaylistToDropdown(playlistId: string, playlistName: string) {
     if (isPlaylistStored) {
         return; // Don't add duplicates to local storage
     }
-    
+
     storedPlaylists.push({ id: playlistId, name: playlistName, highscore: 0 });
     localStorage.setItem(dropdown, JSON.stringify(storedPlaylists));
 }
@@ -167,33 +173,33 @@ function addPlaylistToDropdown(playlistId: string, playlistName: string) {
 
 // Function to update the displayed score
 function updateScoreDisplay() {
-  scoreElement.textContent = `scoreee: ${score}`;
+    scoreElement.textContent = `scoreee: ${score}`;
 }
 
 // Function to update the displayed highscore
 function updateHighscoreDisplay(highscore: number) {
-  highscoreElement.textContent = `best: ${highscore}`;
+    highscoreElement.textContent = `best: ${highscore}`;
 }
 
 // Function to update the highscore if the current score is higher
 function updateHighscore() {
-  const currentHighscore = getPlaylistHighscore(playlistId);
-  if (score > currentHighscore) {
-    updateHighscoreDisplay(score);
-    updatePlaylistHighscore(playlistId, score)
-  }
+    const currentHighscore = getPlaylistHighscore(playlistId);
+    if (score > currentHighscore) {
+        updateHighscoreDisplay(score);
+        updatePlaylistHighscore(playlistId, score)
+    }
 }
 
 // Function to add to the score and update the highscore
 function addScore(num: number) {
-  score = score + num;
-  updateScoreDisplay();
-  updateHighscore();
+    score = score + num;
+    updateScoreDisplay();
+    updateHighscore();
 }
 
 function setScore(num: number) {
-  score = num;
-  updateScoreDisplay();
+    score = num;
+    updateScoreDisplay();
 }
 
 function setLives(num: number) {
@@ -236,7 +242,7 @@ function updatePlaylistHighscore(playlistId: string, newHighscore: number) {
 
 // Initialize highscore display
 updateHighscoreDisplay(0);
-
+fn.setupAutocomplete()
 
 //#endregion
 
@@ -252,18 +258,18 @@ processUrlButton.addEventListener('click', async () => {
             alert("Please enter a valid Spotify Playlist URL.");
             return;
         }
-    
+
         // Extract playlist ID from URL
         playlistId = url.replace("https://open.spotify.com/playlist/", "").split("?")[0];
-    
+
         // Fetch access token and playlist info
         const playlistData = await fn.fetchReference(`playlists/${playlistId}`);
-    
+
         // Check if playlistData has a valid name
         if (playlistData.name) {
             // Add playlist to the dropdown and local storage
             addPlaylistToDropdown(playlistId, playlistData.name);
-    
+
             // Clear the input field after adding the playlist
             urlInput.value = '';
         } else {
@@ -276,13 +282,13 @@ processUrlButton.addEventListener('click', async () => {
             alert("Please enter a valid Spotify Artist URL.");
             return;
         }
-    
+
         // Extract artist ID from URL
         artistId = url.replace("https://open.spotify.com/artist/", "").split("?")[0];
-    
+
         // Fetch access token and artist info
         const artistData = await fn.fetchReference(`artists/${artistId}`);
-    
+
         // Check if artistData has a valid name
         if (artistData.name) {
             addPlaylistToDropdown(artistId, artistData.name);
@@ -298,13 +304,13 @@ processUrlButton.addEventListener('click', async () => {
             alert("Please enter a valid Spotify Album URL.");
             return;
         }
-    
+
         // Extract artist ID from URL
         albumId = url.replace("https://open.spotify.com/album/", "").split("?")[0];
-    
+
         // Fetch access token and artist info
         const albumData = await fn.fetchReference(`albums/${albumId}`);
-    
+
         // Check if artistData has a valid name
         if (albumData.name) {
             addPlaylistToDropdown(albumId, albumData.name);
@@ -315,7 +321,7 @@ processUrlButton.addEventListener('click', async () => {
             console.error('Invalid album data received');
         }
     }
-    
+
 });
 
 // Function to remove the selected playlist from the dropdown and local storage
@@ -353,7 +359,7 @@ removeOptionButton.addEventListener('click', () => {
     } else if (albumCheckbox.checked) {
         updatedOptions = storedOptions.filter((album: { id: string }) => album.id !== selectedOptionId);
     }
-    
+
     // Update local storage
     localStorage.setItem(storageType, JSON.stringify(updatedOptions));
 
@@ -362,9 +368,11 @@ removeOptionButton.addEventListener('click', () => {
 });
 
 // Function to handle playlist selection change
-optionDropdown.addEventListener('change', async () => {
+optionDropdown.addEventListener('change', () => {
+    if (isGettingSource) return;
+    isGettingSource = true
     setScore(0);
-    setLives(3);
+    setLives(4);
     const selectedPlaylistId = optionDropdown.value;
     if (selectedPlaylistId) {
         playlistId = selectedPlaylistId;
@@ -381,15 +389,9 @@ optionDropdown.addEventListener('change', async () => {
         }
 
         // Initialize the game with the selected playlist
-        await initializeGame();
+        initializeGame();
     }
-});
 
-// Check the user's guess when they press Enter in the input field
-guessInput.addEventListener('keypress', function (event) {
-    if (event.key === "Enter") {
-        guessHelper(guessInput.value);
-    }
 });
 
 // Check the user's guess when they click the button
@@ -423,7 +425,7 @@ playlistCheckbox.addEventListener('click', () => {
 
     playlistCheckbox.disabled = true;
 
-    urlInput.placeholder="https://open.spotify.com/playlist/...";
+    urlInput.placeholder = "https://open.spotify.com/playlist/...";
 
     loadPlaylistsFromLocalStorage();
 })
@@ -437,7 +439,7 @@ artistCheckbox.addEventListener('click', () => {
 
     artistCheckbox.disabled = true;
 
-    urlInput.placeholder="https://open.spotify.com/artist/...";
+    urlInput.placeholder = "https://open.spotify.com/artist/...";
 
     loadPlaylistsFromLocalStorage();
 })
@@ -451,7 +453,7 @@ albumCheckbox.addEventListener('click', () => {
 
     albumCheckbox.disabled = true;
 
-    urlInput.placeholder="https://open.spotify.com/album/...";
+    urlInput.placeholder = "https://open.spotify.com/album/...";
 
     loadPlaylistsFromLocalStorage();
 })
@@ -465,7 +467,7 @@ window.addEventListener('load', () => {
 //#region HELPER FUNCTIONS
 
 // Handles what happens on guess
-function guessHelper(input: string) {
+export function guessHelper(input: string) {
     const userGuess = fn.normalizeString(input.trim());
     const normalizedCorrectAnswer = fn.normalizeString(correctAnswer.trim());
     const normalizedAnswerWithoutBrackets = fn.normalizeString(fn.removeBrackets(correctAnswer.trim()));
@@ -486,7 +488,7 @@ function guessHelper(input: string) {
         skipButton.disabled = true;
         revealSongDetails();
     }
-    
+
     // Minor error (close guess)
     else {
         const distance = fn.levenshteinDistance(userGuess, normalizedAnswerWithoutBrackets);
