@@ -1,5 +1,5 @@
 {
-    "input": "./public",
-    "output": "./dist",
+    "input": "./",
+    "output": "./output",
     "minify": true
 }
