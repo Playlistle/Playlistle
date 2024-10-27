@@ -5,6 +5,7 @@
       "npm:@deno/vite-plugin@^1.0.0": "npm:@deno/vite-plugin@1.0.0_vite@5.4.9",
       "npm:appwrite": "npm:appwrite@16.0.2",
       "npm:create-vite-extra@latest": "npm:create-vite-extra@2.3.0",
+      "npm:spotify-types": "npm:spotify-types@1.0.7",
       "npm:vite": "npm:vite@5.4.9",
       "npm:vite@^5.4.8": "npm:vite@5.4.9"
     },
@@ -279,6 +280,10 @@
       },
       "source-map-js@1.2.1": {
         "integrity": "sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==",
+        "dependencies": {}
+      },
+      "spotify-types@1.0.7": {
+        "integrity": "sha512-X2n0MYNUpgakGDU7h/vzTvqVJh2f8kAWE9SG5TkJtf3lJcorndK24/8/6+D7Uww8tqUD1VPHg5Lqv4usdVJUvg==",
         "dependencies": {}
       },
       "vite@5.4.9": {

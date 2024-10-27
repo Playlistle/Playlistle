@@ -67,13 +67,13 @@ async function initializeGame() {
 
     switch (gamemode) {
         case 'playlists':
-            randomSong = await fn.getRandomSongFromPlaylist("https://open.spotify.com/playlist/" + playlistId)
+            randomSong = await fn.randomSongFromPlaylist("https://open.spotify.com/playlist/" + playlistId)
             break;
         case 'artists':
-            randomSong = await fn.getRandomSongFromArtist("https://open.spotify.com/artist/" + artistId);
+            randomSong = await fn.randomSongFromArtist("https://open.spotify.com/artist/" + artistId);
             break;
         case 'albums':
-            randomSong = await fn.getRandomSongFromAlbum("https://open.spotify.com/album/" + albumId);
+            randomSong = await fn.randomSongFromAlbum("https://open.spotify.com/album/" + albumId);
             break;
     }
 
@@ -113,7 +113,7 @@ async function initializeGame() {
     });
 
     // If after 5 attempts no valid song is found, show an error
-    if ((!randomSong?.viable_source && playlistCheckbox.checked)) {
+    if (((randomSong == undefined) && playlistCheckbox.checked)) {
         loadingElement.style.visibility = 'visible';
         loadingElement.innerText = "Too much local songs! Please try a different playlist!";
         imageUrlElement.setAttribute("src", ""); // Clear any image
@@ -255,7 +255,7 @@ processUrlButton.addEventListener('click', async () => {
         playlistId = url.replace("https://open.spotify.com/playlist/", "").split("?")[0];
 
         // Fetch access token and playlist info
-        const playlistData = await fn.fetchReference(`playlists/${playlistId}`);
+        const playlistData = await fn.fetchSpotify(`playlists/${playlistId}`);
 
         // Check if playlistData has a valid name
         if (playlistData.name) {
@@ -279,7 +279,7 @@ processUrlButton.addEventListener('click', async () => {
         artistId = url.replace("https://open.spotify.com/artist/", "").split("?")[0];
 
         // Fetch access token and artist info
-        const artistData = await fn.fetchReference(`artists/${artistId}`);
+        const artistData = await fn.fetchSpotify(`artists/${artistId}`);
 
         // Check if artistData has a valid name
         if (artistData.name) {
@@ -301,7 +301,7 @@ processUrlButton.addEventListener('click', async () => {
         albumId = url.replace("https://open.spotify.com/album/", "").split("?")[0];
 
         // Fetch access token and artist info
-        const albumData = await fn.fetchReference(`albums/${albumId}`);
+        const albumData = await fn.fetchSpotify(`albums/${albumId}`);
 
         // Check if artistData has a valid name
         if (albumData.name) {
