@@ -67,7 +67,7 @@ async function initializeGame() {
 
     switch (gamemode) {
         case 'playlists':
-            randomSong = await fn.randomSongFromPlaylist("https://open.spotify.com/playlist/" + playlistId)
+            randomSong = await fn.randomSongFromPlaylist("https://open.spotify.com/playlist/" + playlistId);
             break;
         case 'artists':
             randomSong = await fn.randomSongFromArtist("https://open.spotify.com/artist/" + artistId);

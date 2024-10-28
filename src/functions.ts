@@ -86,6 +86,7 @@ export function levenshteinDistance(a: string, b: string): number {
     return matrix[b.length][a.length];
 }
 
+// Function to populate autocomplete datalist
 export function setupAutocomplete() {
     const datalistElement = document.getElementById("autocomplete-list") as HTMLDataListElement;
     datalistElement.innerHTML = "";
@@ -184,11 +185,11 @@ export async function randomSongFromAlbum(albumUrl: string) {
         await databaseGet(APPWRITE.DATABASES.MAIN.COLLECTIONS.ALBUMS.ID, albumUrl)
 
         // Get random song from source
-        const hey = await databaseList(APPWRITE.DATABASES.MAIN.COLLECTIONS.ALBUMS.ID, [
+        const list = await databaseList(APPWRITE.DATABASES.MAIN.COLLECTIONS.ALBUMS.ID, [
             Query.equal('$id', albumUrl)
         ])
-        cachedSongs = hey.documents[0].songs.map((track: any) => track.artists + ' - ' + track.name)
-        return hey.documents[0].songs[Math.floor(Math.random() * hey.documents[0].songs.length)]
+        cachedSongs = list.documents[0].songs.map((track: any) => track.artists + ' - ' + track.name)
+        return list.documents[0].songs[Math.floor(Math.random() * list.documents[0].songs.length)]
     } catch {
         // Continue...
         console.log("Album not stored, creating...")
@@ -222,10 +223,11 @@ export async function randomSongFromAlbum(albumUrl: string) {
     })
 
     // Get random song from source
-    const hey = await databaseList(APPWRITE.DATABASES.MAIN.COLLECTIONS.ALBUMS.ID, [
+    const list = await databaseList(APPWRITE.DATABASES.MAIN.COLLECTIONS.ALBUMS.ID, [
         Query.equal('$id', album.id)
     ])
-    return hey.documents[0].songs[Math.floor(Math.random() * hey.documents[0].songs.length)]
+    cachedSongs = list.documents[0].songs.map((track: any) => track.artists + ' - ' + track.name)
+    return list.documents[0].songs[Math.floor(Math.random() * list.documents[0].songs.length)]
 
 }
 
@@ -242,11 +244,11 @@ export async function randomSongFromArtist(artistUrl: string) {
         await databaseGet(APPWRITE.DATABASES.MAIN.COLLECTIONS.ARTISTS.ID, artistUrl)
 
         // Get random song from source
-        const hey = await databaseList(APPWRITE.DATABASES.MAIN.COLLECTIONS.ARTISTS.ID, [
+        const list = await databaseList(APPWRITE.DATABASES.MAIN.COLLECTIONS.ARTISTS.ID, [
             Query.equal('$id', artistUrl)
         ])
-        cachedSongs = hey.documents[0].songs.map((track: any) => track.artists + ' - ' + track.name)
-        return hey.documents[0].songs[Math.floor(Math.random() * hey.documents[0].songs.length)]
+        cachedSongs = list.documents[0].songs.map((track: any) => track.artists + ' - ' + track.name)
+        return list.documents[0].songs[Math.floor(Math.random() * list.documents[0].songs.length)]
     } catch {
         // Continue...
         console.log("Artist not stored, creating...")
@@ -320,10 +322,11 @@ export async function randomSongFromArtist(artistUrl: string) {
     })
 
     // Get random song from source
-    const hey = await databaseList(APPWRITE.DATABASES.MAIN.COLLECTIONS.ARTISTS.ID, [
+    const list = await databaseList(APPWRITE.DATABASES.MAIN.COLLECTIONS.ARTISTS.ID, [
         Query.equal('$id', artist.id)
     ])
-    return hey.documents[0].songs[Math.floor(Math.random() * hey.documents[0].songs.length)]
+    cachedSongs = list.documents[0].songs.map((track: any) => track.artists + ' - ' + track.name)
+    return list.documents[0].songs[Math.floor(Math.random() * list.documents[0].songs.length)]
 }
 
 export async function randomSongFromPlaylist(playlistUrl: string) {
@@ -381,10 +384,12 @@ export async function getPlaylistSongNames(playlistUrl: string) {
         await databaseGet(APPWRITE.DATABASES.MAIN.COLLECTIONS.PLAYLISTS.ID, playlistUrl)
 
         // Get random song from source
-        const hey = await databaseList(APPWRITE.DATABASES.MAIN.COLLECTIONS.PLAYLISTS.ID, [
+        const list = await databaseList(APPWRITE.DATABASES.MAIN.COLLECTIONS.PLAYLISTS.ID, [
             Query.equal('$id', playlistUrl)
         ])
-        return await hey.documents[0].song_names
+        console.log(list.documents[0].song_names);
+        cachedSongs = list.documents[0].song_names;
+        return await list.documents[0].song_names[Math.floor(Math.random() * list.documents[0].songs.length)];
         
     } catch {
         // Continue...
@@ -428,10 +433,12 @@ export async function getPlaylistSongNames(playlistUrl: string) {
     })
 
     // Get random song from source
-    const hey = await databaseList(APPWRITE.DATABASES.MAIN.COLLECTIONS.PLAYLISTS.ID, [
+    const list = await databaseList(APPWRITE.DATABASES.MAIN.COLLECTIONS.PLAYLISTS.ID, [
         Query.equal('$id', playlist.id)
     ])
-    return hey.documents[0].song_names[Math.floor(Math.random() * hey.documents[0].songs.length)]
+    console.log(list.documents[0].song_names);
+    cachedSongs = list.documents[0].song_names;
+    return list.documents[0].song_names[Math.floor(Math.random() * list.documents[0].songs.length)]
 
 }
 
