@@ -44,43 +44,8 @@ h1, h2, h3, label {
     gap: 10px;
 }
 
-/* autocomplete */
-
-/* .autocomplete-container {
-    justify-content: center;
-    position: relative;
-    width: 160px;
-    font-family: Arial, sans-serif;
-}
-
-.autocomplete-list {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    max-height: 200px;
-    overflow-y: auto;
-    border: 1px solid #000;
-    border-radius: 0 0 0px 0px;
-    background-color: #fff;
-    z-index: 1000;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.autocomplete-list li {
-    padding: 2px;
+#imageUrl:hover {
     cursor: pointer;
-    font-size: 14px;
-    color: #333;
+    opacity: .7;
+    transition: .3s;
 }
-
-.autocomplete-list li:hover {
-    background-color: #f0f0f0;
-}
-
-.autocomplete-list li.active {
-    background-color: #0073e6;
-    color: #fff;
-} */

@@ -131,7 +131,11 @@ async function initializeGame() {
 
 // Function to play audio and pause after a given duration
 function playAndPauseAudio(duration: number, overrideStartTime?: number) {
-    if (isPlaying) return; // Exit if audio is already playing
+    if (isPlaying) {
+        audioElement.pause();
+        isPlaying = false;
+        return;
+    }  // Pause song if already playing
     isPlaying = true;
     if (startTime < 30) {
         audioElement.currentTime = startTime;
@@ -455,6 +459,11 @@ albumCheckbox.addEventListener('click', () => {
     loadPlaylistsFromLocalStorage();
 })
 
+// Plays song on cover art click
+imageUrlElement.addEventListener('click', () => {
+    playAndPauseAudio(30);
+})
+
 // Load playlists from local storage when the page is loaded
 window.addEventListener('load', () => {
     playlistCheckbox.checked = true;
@@ -468,6 +477,7 @@ window.addEventListener('load', () => {
 
     loadPlaylistsFromLocalStorage();
 });
+
 //#endregion
 
 //#region HELPER FUNCTIONS
