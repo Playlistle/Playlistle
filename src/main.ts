@@ -9,6 +9,7 @@ let artistId = '';
 let albumId = '';
 let correctAnswer = '';
 let gamemode = 'playlists';
+let lastSong: object;
 let guessCount: number;
 let startTime: number;
 let startTime1: number;
@@ -65,17 +66,21 @@ async function initializeGame() {
 
     let randomSong;
 
-    switch (gamemode) {
-        case 'playlists':
-            randomSong = await fn.randomSongFromPlaylist("https://open.spotify.com/playlist/" + playlistId);
-            break;
-        case 'artists':
-            randomSong = await fn.randomSongFromArtist("https://open.spotify.com/artist/" + artistId);
-            break;
-        case 'albums':
-            randomSong = await fn.randomSongFromAlbum("https://open.spotify.com/album/" + albumId);
-            break;
-    }
+    do {
+        switch (gamemode) {
+            case 'playlists':
+                randomSong = await fn.randomSongFromPlaylist("https://open.spotify.com/playlist/" + playlistId);
+                break;
+            case 'artists':
+                randomSong = await fn.randomSongFromArtist("https://open.spotify.com/artist/" + artistId);
+                break;
+            case 'albums':
+                randomSong = await fn.randomSongFromAlbum("https://open.spotify.com/album/" + albumId);
+                break;
+        }
+    } while (lastSong === randomSong)
+    
+    lastSong = randomSong;
 
     // Update UI elements with song details
     correctAnswer = randomSong?.name as string;
