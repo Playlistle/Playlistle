@@ -1,4 +1,4 @@
-#songName, #songArtist, #imageUrl, #audioElement {
+#song-name, #song-artist, #image-url, #audio-element {
     visibility: hidden;
     align-self: center;
 }
@@ -17,7 +17,7 @@ h1, h2, h3, label {
     flex-direction: column;
 }
 
-#playlist, #songInfo, #controls, #buttons {
+#playlist, #song-info, #controls, #buttons {
     flex-direction: column;
     justify-content: center;
     gap: 10px;
@@ -29,7 +29,7 @@ h1, h2, h3, label {
     gap: 10px;
 }
 
-#newSongButton {
+#newSong-btn {
     align-self: center;
 }
 
@@ -44,8 +44,73 @@ h1, h2, h3, label {
     gap: 10px;
 }
 
-#imageUrl:hover {
+#image-url:hover {
     cursor: pointer;
     opacity: .7;
     transition: .3s;
+}
+
+/* Modal CSS */
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0, 0, 0, 0.4);
+    
+}
+
+.modal-content {
+    background-color: #fefefe;
+    top: 25%;
+    position: relative;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: fit-content;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    animation-name: animatetop;
+    animation-duration: 0.4s;
+    flex-direction: column;
+    text-align: center;
+}
+
+.close {
+    color: black;
+    align-self: flex-end;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover, close:focus {
+    color: #888;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+@keyframes animatetop {
+    from {top: -300px; opacity: 0}
+    to {top: 25%; opacity: 1}
+}
+
+#copy-btn {
+    width: fit-content;
+    align-self: center;
+    font-size: 24px;
+    margin: 5px;
+}
+
+#results {
+    font-size: 18px;
+    line-height: 1.75;
+    gap: 10px;
+}
+
+.modal-content > h1 {
+    margin: 5px;
 }

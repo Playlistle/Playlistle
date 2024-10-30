@@ -16,28 +16,28 @@
       <div id="playlist">
 
         <div id="input">
-          <label for="playlistUrl">yo heres my thing:</label>
-          <input type="text" id="urlInput" placeholder="https://open.spotify.com/playlist/..." autocomplete="off"/>
-          <button id="processUrlButton">add to list</button>
+          <label for="playlist-url">yo heres my thing:</label>
+          <input type="text" id="url-input" placeholder="https://open.spotify.com/playlist/..." autocomplete="off"/>
+          <button id="process-btn">add to list</button>
         </div>
 
         <div id="selector">
-          <label for="optionDropdown">select option:</label>
-          <select id="optionDropdown">
+          <label for="option-drpdn">select option:</label>
+          <select id="option-drpdn">
             <option value="">pick one</option>
           </select>
-          <button id="removePlaylistButton">i dont want this thing anymore</button>
+          <button id="remove-btn">i dont want this thing anymore</button>
         </div>
 
         <div id="selector">
-          <label for="playlistCheckbox">use playlist?</label>
-          <input type="checkbox" id="playlistCheckbox" checked="true" disabled="true">
+          <label for="playlist-cbx">use playlist?</label>
+          <input type="checkbox" id="playlist-cbx" checked="true" disabled="true">
 
-          <label for="artistCheckbox">use artist?</label>
-          <input type="checkbox" id="artistCheckbox">
+          <label for="artist-cbx">use artist?</label>
+          <input type="checkbox" id="artist-cbx">
 
-          <label for="albumCheckbox">use album?</label>
-          <input type="checkbox" id="albumCheckbox">
+          <label for="album-cbx">use album?</label>
+          <input type="checkbox" id="album-cbx">
 
         </div>
         
@@ -45,11 +45,11 @@
 
       
 
-      <div id="songInfo">
+      <div id="song-info">
 
-        <h2><a id="songArtistAndName" href=""></a></a></h2>
-        <img id="imageUrl" src="" width="250" height="250" alt="Cover art for the song/album"></img>
-        <h2 id="correctOrNot"> </h2>
+        <h2><a id="song-title" href=""></a></a></h2>
+        <img id="image-url" src="" width="250" height="250" alt="Cover art for the song/album"></img>
+        <h2 id="feedback"> </h2>
         <h3 id="score">scoreee: 0</h3>
         <h3 id="lives">lives: 3</h3>
         <h3 id="highscore">best: 0</h3>
@@ -61,33 +61,41 @@
         <div id="buttons">
 
           <div id="replay">
-            <button id="replayButton">wait play it again</button>
-            <label id="inputLabel" for="guessInput">guess 1 (0.5 seconds):</label>
+            <button id="replay-btn">wait play it again</button>
+            <label id="input-label" for="guess-input">guess 1 (0.5 seconds):</label>
             <div class="autocomplete-container">
-              <input id="guessInput" type="text" placeholder="enter your guess here..." autocomplete="off" list="autocomplete-list"/>
+              <input id="guess-input" type="text" placeholder="enter your guess here..." autocomplete="off" list="autocomplete-list"/>
               <datalist id="autocomplete-list">
                 <option value="This is a placeholder option!"></option>
               </datalist>
             </div>
-            <button id="submitButton" disabled="true">submit that</button>
-            <button id="skipButton" disabled="true">nah skip that</button>
+            <button id="submit-btn" disabled="true">submit that</button>
+            <button id="skip-btn" disabled="true">nah skip that</button>
           </div>
           
-          <button id="newSongButton">ok another one now</button>
+          <button id="newSong-btn">ok another one now</button>
         </div>
         
         <div id="volume">
-          <label for="volumeSlider">Volume:</label>
-          <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.1" />
+          <label for="volume-slider">Volume:</label>
+          <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.1" />
         </div>
-        
 
+      </div>
+
+      <div id="game-over" class="modal">
+        <div class="modal-content">
+          <span class="close">&times;</span>
+          <h1>Game Over!</h1>
+          <p id="results"></p>
+          <button id="copy-btn">Share</button>
+        </div>
       </div>
 
       <footer>
         <h2 id="loading"></h2>
-        <audio controls id="audioElement">
-          <source id="previewUrl" src="" type="audio/mpeg">
+        <audio controls id="audio-element">
+          <source id="preview-url" src="" type="audio/mpeg">
         </audio>
       </footer>
 

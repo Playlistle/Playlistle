@@ -26,28 +26,33 @@ let isGettingSource = false;
 // Get HTML Elements
 const titleElement = document.getElementById('title') as HTMLElement;
 const loadingElement = document.getElementById('loading') as HTMLElement;
-const correctOrNotElement = document.getElementById('correctOrNot') as HTMLElement;
-const processUrlButton = document.getElementById('processUrlButton') as HTMLButtonElement;
-const urlInput = document.getElementById('urlInput') as HTMLInputElement;
-const inputLabel = document.getElementById('inputLabel') as HTMLLabelElement;
-const guessInput = document.getElementById('guessInput') as HTMLInputElement;
-const replayButton = document.getElementById('replayButton') as HTMLButtonElement;
-const volumeSlider = document.getElementById('volumeSlider') as HTMLInputElement;
-const songInfoElement = document.getElementById('songArtistAndName') as HTMLElement;
-const imageUrlElement = document.getElementById('imageUrl') as HTMLImageElement;
-const audioElement = document.getElementById('audioElement') as HTMLAudioElement;
-const sourceElement = document.getElementById('previewUrl') as HTMLSourceElement;
-const newSongButton = document.getElementById('newSongButton') as HTMLButtonElement;
-const optionDropdown = document.getElementById('optionDropdown') as HTMLSelectElement;
-const removeOptionButton = document.getElementById('removePlaylistButton') as HTMLButtonElement;
-const playlistCheckbox = document.getElementById('playlistCheckbox') as HTMLInputElement;
-const artistCheckbox = document.getElementById('artistCheckbox') as HTMLInputElement;
-const albumCheckbox = document.getElementById('albumCheckbox') as HTMLInputElement;
-const submitButton = document.getElementById('submitButton') as HTMLInputElement;
-const skipButton = document.getElementById('skipButton') as HTMLButtonElement;
+const feedbackElement = document.getElementById('feedback') as HTMLElement;
+const processUrlButton = document.getElementById('process-btn') as HTMLButtonElement;
+const urlInput = document.getElementById('url-input') as HTMLInputElement;
+const inputLabel = document.getElementById('input-label') as HTMLLabelElement;
+const guessInput = document.getElementById('guess-input') as HTMLInputElement;
+const replayButton = document.getElementById('replay-btn') as HTMLButtonElement;
+const volumeSlider = document.getElementById('volume-slider') as HTMLInputElement;
+const songInfoElement = document.getElementById('song-title') as HTMLElement;
+const imageUrlElement = document.getElementById('image-url') as HTMLImageElement;
+const audioElement = document.getElementById('audio-element') as HTMLAudioElement;
+const sourceElement = document.getElementById('preview-url') as HTMLSourceElement;
+const newSongButton = document.getElementById('newSong-btn') as HTMLButtonElement;
+const optionDropdown = document.getElementById('option-drpdn') as HTMLSelectElement;
+const removeOptionButton = document.getElementById('remove-btn') as HTMLButtonElement;
+const playlistCheckbox = document.getElementById('playlist-cbx') as HTMLInputElement;
+const artistCheckbox = document.getElementById('artist-cbx') as HTMLInputElement;
+const albumCheckbox = document.getElementById('album-cbx') as HTMLInputElement;
+const submitButton = document.getElementById('submit-btn') as HTMLInputElement;
+const skipButton = document.getElementById('skip-btn') as HTMLButtonElement;
 const scoreElement = document.getElementById("score") as HTMLElement;
 const highscoreElement = document.getElementById("highscore") as HTMLElement;
 const livesElement = document.getElementById("lives") as HTMLElement;
+const gameoverElement = document.getElementById("game-over") as HTMLElement;
+const testingButton = document.getElementById("testing-btn") as HTMLButtonElement;
+const closeGameoverButton = document.getElementsByClassName("close")[0] as HTMLElement;
+const resultsTextElement = document.getElementById("results") as HTMLElement;
+const shareButton = document.getElementById("copy-btn") as HTMLButtonElement;
 
 //#endregion
 
@@ -57,11 +62,13 @@ const livesElement = document.getElementById("lives") as HTMLElement;
 async function initializeGame() {
     if (!finishedRound) {
         loseLife(1)
-        if (lives == 0) {
-            setLives(3)
-            setScore(0)
-        }
     }
+
+    if (lives <= 0) {
+        setLives(3)
+        setScore(0)
+    }
+
     finishedRound = false
 
     let randomSong;
@@ -91,7 +98,7 @@ async function initializeGame() {
     // Hide the cover and song name
     songInfoElement.style.visibility = 'hidden';
     imageUrlElement.style.visibility = 'hidden';
-    correctOrNotElement.innerText = '';
+    feedbackElement.innerText = '';
     loadingElement.innerText = '';
 
     // Guess inputs
@@ -464,6 +471,29 @@ imageUrlElement.addEventListener('click', () => {
     playAndPauseAudio(30);
 })
 
+// Copy results to clipboard
+shareButton.addEventListener('click', async () => {
+    try {
+        await navigator.clipboard.writeText(`🎧 Playlistle 🎶\n\nFinal score: ${score}\nHighscore: ${getPlaylistHighscore(optionDropdown.value)}\nGamemode: ${gamemode[0].toUpperCase() + gamemode.substring(1).toLocaleLowerCase()} ([${optionDropdown.options[optionDropdown.selectedIndex].innerText}](https://open.spotify.com/${gamemode.slice(0,-1)}/${optionDropdown.value}))\n\n🎵 [Placeholder for link] 🎙️`);
+        shareButton.innerText = "Copied!";
+        console.log("Copied to clipboard!")
+    } catch (err) {
+        console.error('Failed to copy: ', err);
+    }
+})
+
+// Game Over Modal Close Button
+closeGameoverButton.addEventListener('click', () => {
+    gameoverElement.style.display = "none";
+})
+
+// // Close Game Over Modal if click outside of it
+window.addEventListener('click', () => {
+    if (event?.target == gameoverElement) {
+        gameoverElement.style.display = "none";
+    }
+})
+
 // Load playlists from local storage when the page is loaded
 window.addEventListener('load', () => {
     playlistCheckbox.checked = true;
@@ -490,13 +520,13 @@ export function guessHelper(input: string) {
 
     // Input is blank
     if (userGuess == '') {
-        correctOrNotElement.innerText = "hey vro your answer is blank";
+        feedbackElement.innerText = "hey vro your answer is blank";
         return;
     }
 
     // Correct guess
     if (userGuess === normalizedCorrectAnswer || userGuess === normalizedAnswerWithoutBrackets) {
-        correctOrNotElement.innerText = "yep you got it";
+        feedbackElement.innerText = "yep you got it";
         addScore(30 - (guessCount * 10))
         finishedRound = true
         guessInput.disabled = true;
@@ -509,12 +539,12 @@ export function guessHelper(input: string) {
     else {
         const distance = fn.levenshteinDistance(userGuess, normalizedAnswerWithoutBrackets);
         if (distance <= 2) {
-            correctOrNotElement.innerText = "minor spelling mistake bottom text";
+            feedbackElement.innerText = "minor spelling mistake bottom text";
             return;
         }
         // Incorrect guess
         else {
-            correctOrNotElement.innerText = "nope yikes";
+            feedbackElement.innerText = "nope yikes";
             guessIterator();
         }
     }
@@ -548,11 +578,10 @@ function guessIterator() {
         case 3:
             loseLife(1)
             if (lives == 0) {
-                setLives(3)
-                setScore(0)
+                showResults();
             }
             finishedRound = true
-            correctOrNotElement.innerText = "damn that sucks";
+            feedbackElement.innerText = "damn that sucks";
             submitButton.disabled = true;
             skipButton.disabled = true;
             guessInput.disabled = true;
@@ -564,7 +593,7 @@ function guessIterator() {
 
 // Handles skip buttons
 function skipHandler() {
-    correctOrNotElement.innerText = "nah that's fair I gotchu";
+    feedbackElement.innerText = "nah that's fair I gotchu";
     guessIterator();
 }
 
@@ -602,6 +631,11 @@ function loadPlaylistsFromLocalStorage() {
             });
             break;
     }
+}
+
+function showResults () {
+    gameoverElement.style.display = "block";
+    resultsTextElement.innerText = `Final score: ${score}\nHighscore: ${getPlaylistHighscore(optionDropdown.value)}\nGamemode: ${gamemode[0].toUpperCase() + gamemode.substring(1).toLocaleLowerCase()} (${optionDropdown.options[optionDropdown.selectedIndex].innerText})`;
 }
 
 //#endregion
