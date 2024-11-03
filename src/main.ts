@@ -40,14 +40,12 @@ const sourceElement = document.getElementById('preview-url') as HTMLSourceElemen
 const newSongButton = document.getElementById('newSong-btn') as HTMLButtonElement;
 const optionDropdown = document.getElementById('option-drpdn') as HTMLSelectElement;
 const removeOptionButton = document.getElementById('remove-btn') as HTMLButtonElement;
-const playlistCheckbox = document.getElementById('playlist-cbx') as HTMLInputElement;
 const submitButton = document.getElementById('submit-btn') as HTMLInputElement;
 const skipButton = document.getElementById('skip-btn') as HTMLButtonElement;
 const scoreElement = document.getElementById("score") as HTMLElement;
 const highscoreElement = document.getElementById("highscore") as HTMLElement;
 const livesElement = document.getElementById("lives") as HTMLElement;
 const gameoverElement = document.getElementById("game-over") as HTMLElement;
-const testingButton = document.getElementById("testing-btn") as HTMLButtonElement;
 const closeGameoverButton = document.getElementsByClassName("close")[0] as HTMLElement;
 const resultsTextElement = document.getElementById("results") as HTMLElement;
 const shareButton = document.getElementById("copy-btn") as HTMLButtonElement;
@@ -118,7 +116,7 @@ async function initializeGame() {
     });
 
     // If after 5 attempts no valid song is found, show an error
-    if (((randomSong == undefined) && playlistCheckbox.checked)) {
+    if (randomSong == undefined) {
         loadingElement.style.visibility = 'visible';
         loadingElement.innerText = "Too much local songs! Please try a different playlist!";
         imageUrlElement.setAttribute("src", ""); // Clear any image
@@ -252,30 +250,28 @@ updateHighscoreDisplay(0);
 // Handle playlist URL input and add playlist to the dropdown without initializing the game
 processUrlButton.addEventListener('click', async () => {
     const url = urlInput.value;
-    if (playlistCheckbox.checked) {
-        // Process Playlist
+    // Process Playlist
 
-        if (!url.includes("https://open.spotify.com/playlist/")) {
-            alert("Please enter a valid Spotify Playlist URL.");
-            return;
-        }
+    if (!url.includes("https://open.spotify.com/playlist/")) {
+        alert("Please enter a valid Spotify Playlist URL.");
+        return;
+    }
 
-        // Extract playlist ID from URL
-        playlistId = url.replace("https://open.spotify.com/playlist/", "").split("?")[0];
+    // Extract playlist ID from URL
+    playlistId = url.replace("https://open.spotify.com/playlist/", "").split("?")[0];
 
-        // Fetch access token and playlist info
-        const playlistData = await fn.fetchSpotify(`playlists/${playlistId}`);
+    // Fetch access token and playlist info
+    const playlistData = await fn.fetchSpotify(`playlists/${playlistId}`);
 
-        // Check if playlistData has a valid name
-        if (playlistData.name) {
-            // Add playlist to the dropdown and local storage
-            addPlaylistToDropdown(playlistId, playlistData.name);
+    // Check if playlistData has a valid name
+    if (playlistData.name) {
+        // Add playlist to the dropdown and local storage
+        addPlaylistToDropdown(playlistId, playlistData.name);
 
-            // Clear the input field after adding the playlist
-            urlInput.value = '';
-        } else {
-            console.error('Invalid playlist data received');
-        }
+        // Clear the input field after adding the playlist
+        urlInput.value = '';
+    } else {
+        console.error('Invalid playlist data received');
     }
 });
 
@@ -295,10 +291,7 @@ removeOptionButton.addEventListener('click', () => {
 
     // Remove from local storage
     const storedOptions = JSON.parse(localStorage.getItem(gamemode) || '[]');
-    let updatedOptions;
-    if (playlistCheckbox.checked) {
-        updatedOptions = storedOptions.filter((playlist: { id: string }) => playlist.id !== selectedOptionId);
-    }
+    const updatedOptions = storedOptions.filter((playlist: { id: string }) => playlist.id !== selectedOptionId);
 
     // Update local storage
     localStorage.setItem(gamemode, JSON.stringify(updatedOptions));
@@ -336,6 +329,13 @@ submitButton.addEventListener('click', () => {
     guessHelper(guessInput.value);
 });
 
+// Check user's guess on 'enter' press
+guessInput.addEventListener('keydown', function (e) {
+    if (e.key === "Enter") {
+        guessHelper(guessInput.value);
+    }
+})
+
 // Handle replay button click
 replayButton.addEventListener('click', () => {
     playAndPauseAudio(songLength, startTime);
@@ -352,17 +352,6 @@ audioElement.volume = parseFloat(volumeSlider.value);
 volumeSlider.addEventListener('input', () => {
     audioElement.volume = parseFloat(volumeSlider.value);
 });
-
-// Playlist Toggle
-playlistCheckbox.addEventListener('click', () => {
-    gamemode = "playlists";
-
-    playlistCheckbox.disabled = true;
-
-    urlInput.placeholder = "https://open.spotify.com/playlist/...";
-
-    loadPlaylistsFromLocalStorage();
-})
 
 // Plays song on cover art click
 imageUrlElement.addEventListener('click', () => {
@@ -394,9 +383,6 @@ window.addEventListener('click', () => {
 
 // Load playlists from local storage when the page is loaded
 window.addEventListener('load', () => {
-    playlistCheckbox.checked = true;
-    playlistCheckbox.disabled = true;
-
     gamemode = "playlists";
 
     loadPlaylistsFromLocalStorage();
