@@ -19,6 +19,7 @@ let songLength: number;
 let guesses: string[];
 let score = 0;
 let lives = 3;
+let songCount = 0;
 let finishedRound = false;
 let finishedGame = false;
 let isPlaying = false;
@@ -130,6 +131,7 @@ async function initializeGame() {
     guessCount = 0;
     guesses = [];
     songLength = 0.5;
+    songCount++;
 
     // Set up audio preview
     sourceElement.src = await randomSong?.preview_url as string;
@@ -401,6 +403,7 @@ playAgainButton.addEventListener('click', () => {
     gameoverElement.style.display = "none";
     setScore(0);
     setLives(4);
+    songCount = 0;
     initializeGame();
 })
 
@@ -418,7 +421,7 @@ imageUrlElement.addEventListener('click', () => {
 // Copy results to clipboard
 shareButton.addEventListener('click', async () => {
     try {
-        await navigator.clipboard.writeText(`🎧 Playlistle 🎶\n\nFinal score: ${score}\nHighscore: ${getPlaylistHighscore(optionDropdown.value)}\nGamemode: ${gamemode[0].toUpperCase() + gamemode.substring(1).toLocaleLowerCase()} ([${optionDropdown.options[optionDropdown.selectedIndex].innerText}](https://open.spotify.com/${gamemode.slice(0, -1)}/${optionDropdown.value}))\n\n🎵 [Placeholder for link] 🎙️`);
+        await navigator.clipboard.writeText(`🎧 Playlistle 🎶\n\nFinal score: ${score}\nHighscore: ${getPlaylistHighscore(optionDropdown.value)}\nSongs Attempted: ${songCount}\nGamemode: ${gamemode[0].toUpperCase() + gamemode.substring(1).toLocaleLowerCase()} ([${optionDropdown.options[optionDropdown.selectedIndex].innerText}](https://open.spotify.com/${gamemode.slice(0, -1)}/${optionDropdown.value}))\n\n🎵 [Placeholder for link] 🎙️`);
         shareButton.innerText = "Copied!";
         console.log("Copied to clipboard!")
     } catch (err) {
@@ -561,10 +564,12 @@ function loadPlaylistsFromLocalStorage() {
 }
 
 function showResults() {
+    shareButton.innerText = `share with "the others"!`;
     gameoverElement.style.display = "block";
     resultsTextElement.innerText = `
         Final score: ${score}\n
         Highscore: ${getPlaylistHighscore(optionDropdown.value)}\n
+        Songs Attempted: ${songCount}\n
         Gamemode: ${gamemode[0].toUpperCase() + gamemode.substring(1).toLocaleLowerCase()} (${optionDropdown.options[optionDropdown.selectedIndex].innerText})
         `;
 }
