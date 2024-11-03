@@ -190,7 +190,8 @@ export async function randomSongFromPlaylist(playlistUrl: string) {
         attempts++;
 
         const randomSongInfo = await fetchSpotify(`playlists/${playlistUrl}/tracks?limit=1&offset=${Math.floor(Math.random() * playlist.tracks.total)}`);
-        const track = randomSongInfo.items[0].track
+        if (!randomSongInfo.items[0].track) alert("nasa doesn't know what caused this error LMAO, just reload the page and u should be good")
+        const track = await randomSongInfo.items[0].track
 
         if (track.preview_url) {
             validSongFound = true;
@@ -204,6 +205,8 @@ export async function randomSongFromPlaylist(playlistUrl: string) {
             };
             return randomSong;
         }
+
+        console.log("not quite")
 
         // If after 5 attempts no valid song is found, playlist is not viable
         if (attempts === 5 && !validSongFound) {
