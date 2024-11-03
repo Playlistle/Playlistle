@@ -190,6 +190,9 @@ export async function randomSongFromPlaylist(playlistUrl: string) {
         attempts++;
 
         const randomSongInfo = await fetchSpotify(`playlists/${playlistUrl}/tracks?limit=1&offset=${Math.floor(Math.random() * playlist.tracks.total)}`);
+        console.log(randomSongInfo)
+        console.log(playlist.tracks.total)
+        console.log(playlistUrl)
         if (!randomSongInfo.items[0].track) alert("nasa doesn't know what caused this error LMAO, just reload the page and u should be good")
         const track = await randomSongInfo.items[0].track
 
