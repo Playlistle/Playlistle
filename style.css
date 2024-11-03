@@ -72,6 +72,10 @@ button:hover {
     transition: .3s;
 }
 
+#url-input, #guess-input {
+    width: 500px;
+}
+
 /* Modal CSS */
 
 .modal {
