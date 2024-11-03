@@ -39,6 +39,12 @@ button:hover {
     gap: 10px;
 }
 
+#scores {
+    flex-direction: row;
+    justify-content: center;
+    gap: 100px;
+}
+
 #input, #selector {
     flex-direction: row;
     justify-content: center;
@@ -114,7 +120,7 @@ button:hover {
     to {top: 25%; opacity: 1}
 }
 
-#copy-btn {
+#copy-btn, #play-again-btn {
     width: fit-content;
     align-self: center;
     font-size: 24px;

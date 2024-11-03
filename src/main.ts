@@ -20,8 +20,11 @@ let guesses: string[];
 let score = 0;
 let lives = 3;
 let finishedRound = false;
+let finishedGame = false;
 let isPlaying = false;
 let isGettingSource = false;
+let isGettingNewSong = false;
+let isGettingSourceUpdate = false;
 
 // Get HTML Elements
 const titleElement = document.getElementById('title') as HTMLElement;
@@ -49,6 +52,8 @@ const gameoverElement = document.getElementById("game-over") as HTMLElement;
 const closeGameoverButton = document.getElementsByClassName("close")[0] as HTMLElement;
 const resultsTextElement = document.getElementById("results") as HTMLElement;
 const shareButton = document.getElementById("copy-btn") as HTMLButtonElement;
+const playAgainButton = document.getElementById("play-again-btn") as HTMLButtonElement;
+const updateButton = document.getElementById("update-btn") as HTMLButtonElement;
 
 //#endregion
 
@@ -56,19 +61,43 @@ const shareButton = document.getElementById("copy-btn") as HTMLButtonElement;
 
 // Initialize the game by fetching a random song from the playlist
 async function initializeGame() {
-    if (!finishedRound) {
+    if (isGettingNewSong) {
+        return
+    }
+
+    isGettingNewSong = true
+
+    if (!finishedRound && !finishedGame) {
         loseLife(1)
     }
 
     if (lives <= 0) {
         showResults();
+        revealSongDetails()
         setLives(3)
         setScore(0)
+        finishedGame = true
+        submitButton.disabled = true;
+        skipButton.disabled = true;
+        guessInput.disabled = true;
+        isGettingNewSong = false
+        return;
+    }
+
+    if (finishedGame) {
+        setLives(3)
+        finishedGame = false
     }
 
     finishedRound = false
 
     let randomSong: any;
+
+    // Hide the cover and song name
+    songInfoElement.style.visibility = 'hidden';
+    imageUrlElement.style.visibility = 'hidden';
+    loadingElement.innerText = '';
+    feedbackElement.innerText = 'wait wait wait...';
 
     do {
         switch (gamemode) {
@@ -77,20 +106,16 @@ async function initializeGame() {
                 break;
         }
     } while (lastSong === randomSong)
-    
+
     lastSong = randomSong;
 
     // Update UI elements with song details
-    correctAnswer = randomSong?.name as string;
+    correctAnswer = randomSong?.artists as string + " - " + randomSong?.name as string;
     songInfoElement.innerText = `${randomSong?.artists as string} - ${randomSong?.name as string}`;
     songInfoElement.setAttribute("href", randomSong?.main_url as string);
     imageUrlElement.setAttribute("src", randomSong?.image as string);
 
-    // Hide the cover and song name
-    songInfoElement.style.visibility = 'hidden';
-    imageUrlElement.style.visibility = 'hidden';
     feedbackElement.innerText = '';
-    loadingElement.innerText = '';
 
     // Guess inputs
     guessInput.disabled = false
@@ -105,7 +130,7 @@ async function initializeGame() {
 
     // Set up audio preview
     sourceElement.src = await randomSong?.preview_url as string;
-    audioElement.load();
+    await audioElement.load();
 
     startTime = Math.random() * 29; // Random start time for audio
     startTime1 = startTime
@@ -123,6 +148,7 @@ async function initializeGame() {
     }
 
     isGettingSource = false
+    isGettingNewSong = false
 
     fn.setupAutocomplete()
 }
@@ -141,12 +167,17 @@ function playAndPauseAudio(duration: number, overrideStartTime?: number) {
     if (overrideStartTime) {
         audioElement.currentTime = overrideStartTime;
     }
-    audioElement.play();
-
     setTimeout(() => {
-        audioElement.pause();
-        isPlaying = false;
-    }, duration * 1000);
+        audioElement.play().then(() => {
+            setTimeout(() => {
+                audioElement.pause();
+                isPlaying = false;
+            }, duration * 1000);
+        }).catch(error => {
+            console.error("Error playing audio:", error);
+            isPlaying = false;
+        });
+    }, 50);
 }
 
 // Function to add playlist to the dropdown and store it in local storage
@@ -268,10 +299,12 @@ processUrlButton.addEventListener('click', async () => {
         // Add playlist to the dropdown and local storage
         addPlaylistToDropdown(playlistId, playlistData.name);
 
-        // Clear the input field after adding the playlist
-        urlInput.value = '';
-    } else {
-        console.error('Invalid playlist data received');
+            // Clear the input field after adding the playlist
+            urlInput.value = '';
+        } else {
+            console.error('Invalid playlist data received');
+            alert("Error getting playlist (Make sure to make your playlist public!)")
+        }
     }
 });
 
@@ -309,7 +342,7 @@ optionDropdown.addEventListener('change', () => {
     const selectedPlaylistId = optionDropdown.value;
     if (selectedPlaylistId) {
         switch (gamemode) {
-            case 'playlists': 
+            case 'playlists':
                 playlistId = selectedPlaylistId;
                 titleElement.innerText = "Welcome to Playlistle! The song guessing game??????"
                 break;
@@ -329,9 +362,8 @@ submitButton.addEventListener('click', () => {
     guessHelper(guessInput.value);
 });
 
-// Check user's guess on 'enter' press
-guessInput.addEventListener('keydown', function (e) {
-    if (e.key === "Enter") {
+guessInput.addEventListener('keypress', function (key) {
+    if (key.key === 'Enter') {
         guessHelper(guessInput.value);
     }
 })
@@ -347,6 +379,29 @@ skipButton.addEventListener('click', skipHandler)
 // Handle new song button click
 newSongButton.addEventListener('click', initializeGame);
 
+updateButton.addEventListener('click', async () => {
+    if (isGettingSourceUpdate) {
+        return
+    }
+    isGettingSourceUpdate = true
+    const updatedSongs = await fn.getPlaylistSongNames("https://open.spotify.com/playlist/" + playlistId, true)
+    fn.databaseUpdate(fn.APPWRITE.DATABASES.MAIN.COLLECTIONS.PLAYLISTS.ID, playlistId, {
+        song_names: updatedSongs
+    })
+    feedbackElement.innerText = 'updated! yipee!';
+    setScore(0);
+    setLives(4);
+    initializeGame()
+    isGettingSourceUpdate = false
+})
+
+playAgainButton.addEventListener('click', () => {
+    gameoverElement.style.display = "none";
+    setScore(0);
+    setLives(4);
+    initializeGame();
+})
+
 // Set initial volume from the slider
 audioElement.volume = parseFloat(volumeSlider.value);
 volumeSlider.addEventListener('input', () => {
@@ -361,7 +416,7 @@ imageUrlElement.addEventListener('click', () => {
 // Copy results to clipboard
 shareButton.addEventListener('click', async () => {
     try {
-        await navigator.clipboard.writeText(`🎧 Playlistle 🎶\n\nFinal score: ${score}\nHighscore: ${getPlaylistHighscore(optionDropdown.value)}\nGamemode: ${gamemode[0].toUpperCase() + gamemode.substring(1).toLocaleLowerCase()} ([${optionDropdown.options[optionDropdown.selectedIndex].innerText}](https://open.spotify.com/${gamemode.slice(0,-1)}/${optionDropdown.value}))\n\n🎵 [Placeholder for link] 🎙️`);
+        await navigator.clipboard.writeText(`🎧 Playlistle 🎶\n\nFinal score: ${score}\nHighscore: ${getPlaylistHighscore(optionDropdown.value)}\nGamemode: ${gamemode[0].toUpperCase() + gamemode.substring(1).toLocaleLowerCase()} ([${optionDropdown.options[optionDropdown.selectedIndex].innerText}](https://open.spotify.com/${gamemode.slice(0, -1)}/${optionDropdown.value}))\n\n🎵 [Placeholder for link] 🎙️`);
         shareButton.innerText = "Copied!";
         console.log("Copied to clipboard!")
     } catch (err) {
@@ -394,9 +449,7 @@ window.addEventListener('load', () => {
 
 // Handles what happens on guess
 export function guessHelper(input: string) {
-    const userGuess = fn.normalizeString(input.trim());
-    const normalizedCorrectAnswer = fn.normalizeString(correctAnswer.trim());
-    const normalizedAnswerWithoutBrackets = fn.normalizeString(fn.removeBrackets(correctAnswer.trim()));
+    const userGuess = input;
 
     // Input is blank
     if (userGuess == '') {
@@ -405,7 +458,7 @@ export function guessHelper(input: string) {
     }
 
     // Correct guess
-    if (userGuess === normalizedCorrectAnswer || userGuess === normalizedAnswerWithoutBrackets) {
+    if (userGuess === correctAnswer) {
         feedbackElement.innerText = "yep you got it";
         addScore(30 - (guessCount * 10))
         finishedRound = true
@@ -415,18 +468,10 @@ export function guessHelper(input: string) {
         revealSongDetails();
     }
 
-    // Minor error (close guess)
+    // Incorrect guess
     else {
-        const distance = fn.levenshteinDistance(userGuess, normalizedAnswerWithoutBrackets);
-        if (distance <= 2) {
-            feedbackElement.innerText = "minor spelling mistake bottom text";
-            return;
-        }
-        // Incorrect guess
-        else {
-            feedbackElement.innerText = "nope yikes";
-            guessIterator();
-        }
+        feedbackElement.innerText = "nope yikes";
+        guessIterator();
     }
 
 }
@@ -495,7 +540,7 @@ function loadPlaylistsFromLocalStorage() {
     const storedCollections = JSON.parse(localStorage.getItem(gamemode) || '[]');
 
     switch (gamemode) {
-        case 'playlists': 
+        case 'playlists':
             storedCollections.forEach((playlist: { id: string, name: string }) => {
                 addPlaylistToDropdown(playlist.id, playlist.name);
             });
@@ -513,9 +558,13 @@ function loadPlaylistsFromLocalStorage() {
     }
 }
 
-function showResults () {
+function showResults() {
     gameoverElement.style.display = "block";
-    resultsTextElement.innerText = `Final score: ${score}\nHighscore: ${getPlaylistHighscore(optionDropdown.value)}\nGamemode: ${gamemode[0].toUpperCase() + gamemode.substring(1).toLocaleLowerCase()} (${optionDropdown.options[optionDropdown.selectedIndex].innerText})`;
+    resultsTextElement.innerText = `
+        Final score: ${score}\n
+        Highscore: ${getPlaylistHighscore(optionDropdown.value)}\n
+        Gamemode: ${gamemode[0].toUpperCase() + gamemode.substring(1).toLocaleLowerCase()} (${optionDropdown.options[optionDropdown.selectedIndex].innerText})
+        `;
 }
 
 //#endregion

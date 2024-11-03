@@ -129,7 +129,7 @@ async function databasePost(collectionID: string, documentID: string, data: Omit
 }
 
 // Update document in the database
-function databaseUpdate(collectionID: string, documentID: string, data: Partial<Omit<Models.Document, keyof Models.Document>>) {
+export function databaseUpdate(collectionID: string, documentID: string, data: Partial<Omit<Models.Document, keyof Models.Document>>) {
     appwriteDatabases.updateDocument(
         APPWRITE.DATABASES.MAIN.ID,
         collectionID,
@@ -166,7 +166,8 @@ async function databaseList(collectionID: string, queries: string[]) {
 }
 
 export async function randomSongFromPlaylist(playlistUrl: string) {
-    
+
+    cachedSongs = await getPlaylistSongNames(playlistUrl) as string[]
     // Test for vaild URL
     if (!playlistUrl.startsWith("https://open.spotify.com/playlist/")) {
         alert("Please enter a valid Spotify Playlist URL.");
@@ -179,7 +180,10 @@ export async function randomSongFromPlaylist(playlistUrl: string) {
 
     const playlist = await fetchSpotify(`playlists/${playlistUrl}`)
 
-    cachedSongs = [] // This will change in the future
+    if (playlist.tracks.total > 300) {
+        alert("Too many songs in the playlist, please use a playlist under 300 songs! (We are working to increase this number in the future)");
+        return;
+    }
 
     while (!validSongFound && attempts < 5) {
         attempts++;
@@ -203,12 +207,13 @@ export async function randomSongFromPlaylist(playlistUrl: string) {
 
         // If after 5 attempts no valid song is found, playlist is not viable
         if (attempts === 5 && !validSongFound) {
-            return "Error: Too many unavailable songs!";
+            alert("Too many unavailable songs! Please use a different playlist")
+            return;
         }
     }
 }
 
-export async function getPlaylistSongNames(playlistUrl: string) {
+export async function getPlaylistSongNames(playlistUrl: string, bypass?: boolean) {
     // Test for vaild URL
     if (!playlistUrl.startsWith("https://open.spotify.com/playlist/")) {
         alert("Please enter a valid Spotify Playlist URL.");
@@ -217,20 +222,22 @@ export async function getPlaylistSongNames(playlistUrl: string) {
     playlistUrl = playlistUrl.replace("https://open.spotify.com/playlist/", "").split("?")[0];
 
     // Test to if source is already in the database
-    try {
-        await databaseGet(APPWRITE.DATABASES.MAIN.COLLECTIONS.PLAYLISTS.ID, playlistUrl)
+    if (!bypass) {
+        try {
+            await databaseGet(APPWRITE.DATABASES.MAIN.COLLECTIONS.PLAYLISTS.ID, playlistUrl)
 
-        // Get random song from source
-        const list = await databaseList(APPWRITE.DATABASES.MAIN.COLLECTIONS.PLAYLISTS.ID, [
-            Query.equal('$id', playlistUrl)
-        ])
-        console.log(list.documents[0].song_names);
-        cachedSongs = list.documents[0].song_names;
-        return await list.documents[0].song_names[Math.floor(Math.random() * list.documents[0].songs.length)];
-        
-    } catch {
-        // Continue...
-        console.log("Playlist not stored, creating...")
+            // Get random song from source
+            const list = await databaseList(APPWRITE.DATABASES.MAIN.COLLECTIONS.PLAYLISTS.ID, [
+                Query.equal('$id', playlistUrl)
+            ])
+            console.log(list.documents[0].song_names);
+            cachedSongs = list.documents[0].song_names;
+            return await cachedSongs;
+
+        } catch {
+            // Continue...
+            console.log("Playlist not stored, creating...")
+        }
     }
 
     // Get songs from spotify
@@ -238,6 +245,8 @@ export async function getPlaylistSongNames(playlistUrl: string) {
     const playlistSongs: any[] = [];
     const limit = 100
     let offset = 0
+
+    console.log(playlist.public)
 
     do {
         const batch = await fetchSpotify(`playlists/${playlistUrl}/tracks?limit=${limit}&offset=${offset}`)
@@ -259,6 +268,14 @@ export async function getPlaylistSongNames(playlistUrl: string) {
     } while (offset < playlist.tracks.total);
 
     // Add source to database
+    if (playlist.images == null) {
+        alert("Cannot use playlist, please try using another one")
+        return;
+    }
+
+    if (bypass) {
+        return playlistSongs.map(track => track.artists + " - " + track.name)
+    }
 
     await databasePost(APPWRITE.DATABASES.MAIN.COLLECTIONS.PLAYLISTS.ID, playlist.id, {
         name: playlist.name,
@@ -269,13 +286,14 @@ export async function getPlaylistSongNames(playlistUrl: string) {
         spotify_url: playlist.external_urls.spotify
     })
 
+
     // Get random song from source
     const list = await databaseList(APPWRITE.DATABASES.MAIN.COLLECTIONS.PLAYLISTS.ID, [
         Query.equal('$id', playlist.id)
     ])
     console.log(list.documents[0].song_names);
     cachedSongs = list.documents[0].song_names;
-    return list.documents[0].song_names[Math.floor(Math.random() * list.documents[0].songs.length)]
+    return cachedSongs
 
 }
 
