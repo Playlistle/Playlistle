@@ -401,6 +401,13 @@ submitButton.addEventListener('click', () => {
     guessHelper(guessInput.value);
 });
 
+// Check user's guess on 'enter' press
+guessInput.addEventListener('keydown', function (e) {
+    if (e.key === "Enter") {
+        guessHelper(guessInput.value);
+    }
+});
+
 // Handle replay button click
 replayButton.addEventListener('click', () => {
     playAndPauseAudio(songLength, startTime);
