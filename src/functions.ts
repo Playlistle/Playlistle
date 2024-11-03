@@ -91,7 +91,6 @@ export function setupAutocomplete() {
     }
 
     datalistElement.innerHTML = datalistHTML;
-    console.log(datalistElement);
 }
 
 //#endregion
@@ -167,7 +166,7 @@ async function databaseList(collectionID: string, queries: string[]) {
 
 export async function randomSongFromPlaylist(playlistUrl: string) {
 
-    cachedSongs = await getPlaylistSongNames(playlistUrl) as string[]
+    const url = playlistUrl
     // Test for vaild URL
     if (!playlistUrl.startsWith("https://open.spotify.com/playlist/")) {
         alert("Please enter a valid Spotify Playlist URL.");
@@ -185,12 +184,13 @@ export async function randomSongFromPlaylist(playlistUrl: string) {
         return;
     }
 
+    cachedSongs = await getPlaylistSongNames(url) as string[]
+
     while (!validSongFound && attempts < 5) {
         attempts++;
 
         const randomSongInfo = await fetchSpotify(`playlists/${playlistUrl}/tracks?limit=1&offset=${Math.floor(Math.random() * playlist.tracks.total)}`);
         const track = randomSongInfo.items[0].track
-        console.log(track)
 
         if (track.preview_url) {
             validSongFound = true;
@@ -230,7 +230,6 @@ export async function getPlaylistSongNames(playlistUrl: string, bypass?: boolean
             const list = await databaseList(APPWRITE.DATABASES.MAIN.COLLECTIONS.PLAYLISTS.ID, [
                 Query.equal('$id', playlistUrl)
             ])
-            console.log(list.documents[0].song_names);
             cachedSongs = list.documents[0].song_names;
             return await cachedSongs;
 
@@ -246,8 +245,6 @@ export async function getPlaylistSongNames(playlistUrl: string, bypass?: boolean
     const limit = 100
     let offset = 0
 
-    console.log(playlist.public)
-
     do {
         const batch = await fetchSpotify(`playlists/${playlistUrl}/tracks?limit=${limit}&offset=${offset}`)
         for (const track of batch.items) {
@@ -261,7 +258,6 @@ export async function getPlaylistSongNames(playlistUrl: string, bypass?: boolean
                     image: track.track.album.images[0].url,
                     spotify_url: track.track.external_urls.spotify
                 })
-                console.log("aaaa")
             }
         }
         offset += limit
@@ -291,7 +287,6 @@ export async function getPlaylistSongNames(playlistUrl: string, bypass?: boolean
     const list = await databaseList(APPWRITE.DATABASES.MAIN.COLLECTIONS.PLAYLISTS.ID, [
         Query.equal('$id', playlist.id)
     ])
-    console.log(list.documents[0].song_names);
     cachedSongs = list.documents[0].song_names;
     return cachedSongs
 

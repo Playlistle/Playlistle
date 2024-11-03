@@ -92,6 +92,7 @@ async function initializeGame() {
     finishedRound = false
 
     let randomSong: any;
+    let gotSong = false
 
     // Hide the cover and song name
     songInfoElement.style.visibility = 'hidden';
@@ -100,9 +101,11 @@ async function initializeGame() {
     feedbackElement.innerText = 'wait wait wait...';
 
     do {
+        if (gotSong) break
         switch (gamemode) {
             case 'playlists':
                 randomSong = await fn.randomSongFromPlaylist("https://open.spotify.com/playlist/" + playlistId);
+                gotSong = true
                 break;
         }
     } while (lastSong === randomSong)
@@ -142,8 +145,7 @@ async function initializeGame() {
 
     // If after 5 attempts no valid song is found, show an error
     if (randomSong == undefined) {
-        loadingElement.style.visibility = 'visible';
-        loadingElement.innerText = "Too much local songs! Please try a different playlist!";
+        feedbackElement.innerText = "Please try a different playlist!";
         imageUrlElement.setAttribute("src", ""); // Clear any image
     }
 
