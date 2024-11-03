@@ -9,7 +9,7 @@ let artistId = '';
 let albumId = '';
 let correctAnswer = '';
 let gamemode = 'playlists';
-let lastSong: object;
+let lastSong: any;
 let guessCount: number;
 let startTime: number;
 let startTime1: number;
@@ -41,8 +41,6 @@ const newSongButton = document.getElementById('newSong-btn') as HTMLButtonElemen
 const optionDropdown = document.getElementById('option-drpdn') as HTMLSelectElement;
 const removeOptionButton = document.getElementById('remove-btn') as HTMLButtonElement;
 const playlistCheckbox = document.getElementById('playlist-cbx') as HTMLInputElement;
-const artistCheckbox = document.getElementById('artist-cbx') as HTMLInputElement;
-const albumCheckbox = document.getElementById('album-cbx') as HTMLInputElement;
 const submitButton = document.getElementById('submit-btn') as HTMLInputElement;
 const skipButton = document.getElementById('skip-btn') as HTMLButtonElement;
 const scoreElement = document.getElementById("score") as HTMLElement;
@@ -65,24 +63,19 @@ async function initializeGame() {
     }
 
     if (lives <= 0) {
+        showResults();
         setLives(3)
         setScore(0)
     }
 
     finishedRound = false
 
-    let randomSong;
+    let randomSong: any;
 
     do {
         switch (gamemode) {
             case 'playlists':
                 randomSong = await fn.randomSongFromPlaylist("https://open.spotify.com/playlist/" + playlistId);
-                break;
-            case 'artists':
-                randomSong = await fn.randomSongFromArtist("https://open.spotify.com/artist/" + artistId);
-                break;
-            case 'albums':
-                randomSong = await fn.randomSongFromAlbum("https://open.spotify.com/album/" + albumId);
                 break;
         }
     } while (lastSong === randomSong)
@@ -283,53 +276,7 @@ processUrlButton.addEventListener('click', async () => {
         } else {
             console.error('Invalid playlist data received');
         }
-    } else if (artistCheckbox.checked) {
-        // Process Artist
-
-        if (!url.includes("https://open.spotify.com/artist/")) {
-            alert("Please enter a valid Spotify Artist URL.");
-            return;
-        }
-
-        // Extract artist ID from URL
-        artistId = url.replace("https://open.spotify.com/artist/", "").split("?")[0];
-
-        // Fetch access token and artist info
-        const artistData = await fn.fetchSpotify(`artists/${artistId}`);
-
-        // Check if artistData has a valid name
-        if (artistData.name) {
-            addPlaylistToDropdown(artistId, artistData.name);
-
-            // Clear the input field after adding the playlist
-            urlInput.value = '';
-        } else {
-            console.error('Invalid artist data received');
-        }
-    } else if (albumCheckbox.checked) {
-        // Process Album
-        if (!url.includes("https://open.spotify.com/album/")) {
-            alert("Please enter a valid Spotify Album URL.");
-            return;
-        }
-
-        // Extract artist ID from URL
-        albumId = url.replace("https://open.spotify.com/album/", "").split("?")[0];
-
-        // Fetch access token and artist info
-        const albumData = await fn.fetchSpotify(`albums/${albumId}`);
-
-        // Check if artistData has a valid name
-        if (albumData.name) {
-            addPlaylistToDropdown(albumId, albumData.name);
-
-            // Clear the input field after adding the playlist
-            urlInput.value = '';
-        } else {
-            console.error('Invalid album data received');
-        }
     }
-
 });
 
 // Function to remove the selected playlist from the dropdown and local storage
@@ -351,10 +298,6 @@ removeOptionButton.addEventListener('click', () => {
     let updatedOptions;
     if (playlistCheckbox.checked) {
         updatedOptions = storedOptions.filter((playlist: { id: string }) => playlist.id !== selectedOptionId);
-    } else if (artistCheckbox.checked) {
-        updatedOptions = storedOptions.filter((artist: { id: string }) => artist.id !== selectedOptionId);
-    } else if (albumCheckbox.checked) {
-        updatedOptions = storedOptions.filter((album: { id: string }) => album.id !== selectedOptionId);
     }
 
     // Update local storage
@@ -376,14 +319,6 @@ optionDropdown.addEventListener('change', () => {
             case 'playlists': 
                 playlistId = selectedPlaylistId;
                 titleElement.innerText = "Welcome to Playlistle! The song guessing game??????"
-                break;
-            case 'artists':
-                artistId = selectedPlaylistId;
-                titleElement.innerText = "Welcome to " + optionDropdown.options[optionDropdown.selectedIndex].innerText + "le! The song guessing game??????"
-                break;
-            case 'albums':
-                albumId = selectedPlaylistId;
-                titleElement.innerText = "Welcome to " + optionDropdown.options[optionDropdown.selectedIndex].innerText + "le! The song guessing game??????"
                 break;
         }
 
@@ -420,48 +355,11 @@ volumeSlider.addEventListener('input', () => {
 
 // Playlist Toggle
 playlistCheckbox.addEventListener('click', () => {
-    artistCheckbox.disabled = false;
-    artistCheckbox.checked = false;
-    albumCheckbox.disabled = false;
-    albumCheckbox.checked = false;
-
     gamemode = "playlists";
 
     playlistCheckbox.disabled = true;
 
     urlInput.placeholder = "https://open.spotify.com/playlist/...";
-
-    loadPlaylistsFromLocalStorage();
-})
-
-// Artist Toggle
-artistCheckbox.addEventListener('click', () => {
-    playlistCheckbox.disabled = false;
-    playlistCheckbox.checked = false;
-    albumCheckbox.disabled = false;
-    albumCheckbox.checked = false;
-
-    gamemode = "artists";
-
-    artistCheckbox.disabled = true;
-
-    urlInput.placeholder = "https://open.spotify.com/artist/...";
-
-    loadPlaylistsFromLocalStorage();
-})
-
-// Album Toggle
-albumCheckbox.addEventListener('click', () => {
-    playlistCheckbox.disabled = false;
-    playlistCheckbox.checked = false;
-    artistCheckbox.disabled = false;
-    artistCheckbox.checked = false;
-
-    gamemode = "albums";
-
-    albumCheckbox.disabled = true;
-
-    urlInput.placeholder = "https://open.spotify.com/album/...";
 
     loadPlaylistsFromLocalStorage();
 })
@@ -498,10 +396,6 @@ window.addEventListener('click', () => {
 window.addEventListener('load', () => {
     playlistCheckbox.checked = true;
     playlistCheckbox.disabled = true;
-    artistCheckbox.checked = false;
-    artistCheckbox.disabled = false;
-    albumCheckbox.checked = false;
-    albumCheckbox.disabled = false;
 
     gamemode = "playlists";
 

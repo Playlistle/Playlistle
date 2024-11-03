@@ -1,3 +1,9 @@
+html * {
+    color: #abb3c0;
+    font-family: monospace;
+    background-color:#202a31;
+}
+
 #song-name, #song-artist, #image-url, #audio-element {
     visibility: hidden;
     align-self: center;
@@ -11,6 +17,16 @@ div {
 h1, h2, h3, label {
     text-align: center;
     align-content: center;
+}
+
+button, input, select {
+    background-color: #15191b;
+    border: none;
+    background: #15191b;
+}
+
+button:hover {
+    background-color: #212324;
 }
 
 #header {
@@ -62,16 +78,16 @@ h1, h2, h3, label {
     height: 100%;
     overflow: auto;
     background-color: rgb(0, 0, 0, 0.4);
-    
+    margin: 0%;
 }
 
 .modal-content {
-    background-color: #fefefe;
+    background-color:#202a31;
     top: 25%;
     position: relative;
     margin: auto;
     padding: 20px;
-    border: 1px solid #888;
+    border: none;
     width: fit-content;
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
     animation-name: animatetop;
@@ -81,7 +97,7 @@ h1, h2, h3, label {
 }
 
 .close {
-    color: black;
+    color: #abb3c0;
     align-self: flex-end;
     font-size: 28px;
     font-weight: bold;

@@ -16,12 +16,6 @@ export const APPWRITE = {
         MAIN: {
             ID: '671c78ce0008a5ad6270',
             COLLECTIONS: {
-                ALBUMS: {
-                    ID: '671c798600109d0a59c7'
-                },
-                ARTISTS: {
-                    ID: '671c797d0030f64abfb0'
-                },
                 PLAYLISTS: {
                     ID: '671c795b00242248cc4f'
                 },
@@ -171,164 +165,6 @@ async function databaseList(collectionID: string, queries: string[]) {
     )
 }
 
-// TODO: add song preview url validation to this function like the playlist one
-export async function randomSongFromAlbum(albumUrl: string) {
-    // Test for vaild URL
-    if (!albumUrl.startsWith("https://open.spotify.com/album/")) {
-        alert("Please enter a valid Spotify Album URL.");
-        return;
-    }
-    albumUrl = albumUrl.replace("https://open.spotify.com/album/", "").split("?")[0];
-
-    // Test to if source is already in the database
-    try {
-        await databaseGet(APPWRITE.DATABASES.MAIN.COLLECTIONS.ALBUMS.ID, albumUrl)
-
-        // Get random song from source
-        const list = await databaseList(APPWRITE.DATABASES.MAIN.COLLECTIONS.ALBUMS.ID, [
-            Query.equal('$id', albumUrl)
-        ])
-        cachedSongs = list.documents[0].songs.map((track: any) => track.artists + ' - ' + track.name)
-        return list.documents[0].songs[Math.floor(Math.random() * list.documents[0].songs.length)]
-    } catch {
-        // Continue...
-        console.log("Album not stored, creating...")
-    }
-
-    // Get songs from spotify
-    const album = await fetchSpotify(`albums/${albumUrl}`)
-    const albumSongs: any[] = [];
-    for (const track of album.tracks.items) {
-        if (track.preview_url) {
-            albumSongs.push({
-                name: track.name,
-                id: track.id,
-                $id: track.id,
-                preview_url: track.preview_url,
-                artists: track.artists.map((artist: SimplifiedArtist) => artist.name).join(', '),
-                image: album.images[0].url,
-                spotify_url: track.external_urls.spotify
-            })
-        }
-    }
-
-    // Add source to database
-    await databasePost(APPWRITE.DATABASES.MAIN.COLLECTIONS.ALBUMS.ID, album.id, {
-        name: album.name,
-        image: album.images[0].url,
-        id: album.id,
-        artists: album.artists.map((artist: SimplifiedArtist) => artist.name).join(', '),
-        songs: albumSongs,
-        spotify_url: album.external_urls.spotify
-    })
-
-    // Get random song from source
-    const list = await databaseList(APPWRITE.DATABASES.MAIN.COLLECTIONS.ALBUMS.ID, [
-        Query.equal('$id', album.id)
-    ])
-    cachedSongs = list.documents[0].songs.map((track: any) => track.artists + ' - ' + track.name)
-    return list.documents[0].songs[Math.floor(Math.random() * list.documents[0].songs.length)]
-
-}
-
-export async function randomSongFromArtist(artistUrl: string) {
-    // Test for vaild URL
-    if (!artistUrl.startsWith("https://open.spotify.com/artist/")) {
-        alert("Please enter a valid Spotify Artist URL.");
-        return;
-    }
-    artistUrl = artistUrl.replace("https://open.spotify.com/artist/", "").split("?")[0];
-
-    // Test to if source is already in the database
-    try {
-        await databaseGet(APPWRITE.DATABASES.MAIN.COLLECTIONS.ARTISTS.ID, artistUrl)
-
-        // Get random song from source
-        const list = await databaseList(APPWRITE.DATABASES.MAIN.COLLECTIONS.ARTISTS.ID, [
-            Query.equal('$id', artistUrl)
-        ])
-        cachedSongs = list.documents[0].songs.map((track: any) => track.artists + ' - ' + track.name)
-        return list.documents[0].songs[Math.floor(Math.random() * list.documents[0].songs.length)]
-    } catch {
-        // Continue...
-        console.log("Artist not stored, creating...")
-    }
-
-    // Get songs from spotify
-    const artist = await fetchSpotify(`artists/${artistUrl}`)
-    let artistSongs: any[] = [];
-    let albums: Album[] = [];
-    let offset = 0;
-    const limit = 50; // Max limit for album fetches
-    let totalAlbums = 0;
-
-    // Fetch albums with pagination to collect all albums
-    do {
-        const artistAlbums = await fetchSpotify(`artists/${artistUrl}/albums?limit=${limit}&offset=${offset}`);
-        albums = albums.concat(artistAlbums.items as Album[]);
-        totalAlbums = artistAlbums.total;
-        offset += limit;
-    } while (offset < totalAlbums);
-
-    // Group albums into batches of 20 IDs
-    const albumIds = albums.map(album => album.id);
-    const albumBatches: string[] = [];
-    for (let i = 0; i < albumIds.length; i += 20) {
-        albumBatches.push(albumIds.slice(i, i + 20).join(","));
-    }
-
-    // Fetch tracks for multiple albums at once, using the batches
-    for (const batch of albumBatches) {
-        const albumsData = await fetchSpotify(`albums?ids=${batch}`);
-        for (const album of albumsData.albums as Album[]) {
-            for (const track of Array.isArray(album.tracks) ? album.tracks : album.tracks.items) {
-                if (track.artists.some((artist: SimplifiedArtist) => artist.id === artistUrl)) {
-                    if (track.preview_url) {
-                        artistSongs.push({
-                            name: track.name,
-                            id: track.id,
-                            $id: track.id,
-                            preview_url: track.preview_url,
-                            artists: track.artists.map((artist: SimplifiedArtist) => artist.name).join(', '),
-                            image: album.images[0].url,
-                            spotify_url: track.external_urls.spotify
-                        })
-                    }
-                }
-            }
-        }
-    }
-
-    // Filter out songs with undefined preview urls
-    artistSongs = artistSongs.filter(song => song.preview_url !== undefined);
-
-    // Filter out duplicate songs
-    const uniqueSongsMap = new Map<string, Track>();
-    for (const song of artistSongs) {
-        const key = `${song.name}-${song.artists}`;
-        if (!uniqueSongsMap.has(key)) {
-            uniqueSongsMap.set(key, song);
-        }
-    }
-    artistSongs = Array.from(uniqueSongsMap.values());
-
-    // Add source to database
-    await databasePost(APPWRITE.DATABASES.MAIN.COLLECTIONS.ARTISTS.ID, artist.id, {
-        name: artist.name,
-        image: artist.images[0].url,
-        id: artist.id,
-        songs: artistSongs,
-        spotify_url: artist.external_urls.spotify
-    })
-
-    // Get random song from source
-    const list = await databaseList(APPWRITE.DATABASES.MAIN.COLLECTIONS.ARTISTS.ID, [
-        Query.equal('$id', artist.id)
-    ])
-    cachedSongs = list.documents[0].songs.map((track: any) => track.artists + ' - ' + track.name)
-    return list.documents[0].songs[Math.floor(Math.random() * list.documents[0].songs.length)]
-}
-
 export async function randomSongFromPlaylist(playlistUrl: string) {
     
     // Test for vaild URL
@@ -350,6 +186,7 @@ export async function randomSongFromPlaylist(playlistUrl: string) {
 
         const randomSongInfo = await fetchSpotify(`playlists/${playlistUrl}/tracks?limit=1&offset=${Math.floor(Math.random() * playlist.tracks.total)}`);
         const track = randomSongInfo.items[0].track
+        console.log(track)
 
         if (track.preview_url) {
             validSongFound = true;
