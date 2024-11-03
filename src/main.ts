@@ -306,7 +306,7 @@ processUrlButton.addEventListener('click', async () => {
             alert("Error getting playlist (Make sure to make your playlist public!)")
         }
     }
-});
+);
 
 // Function to remove the selected playlist from the dropdown and local storage
 removeOptionButton.addEventListener('click', () => {
