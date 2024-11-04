@@ -430,7 +430,6 @@ imageUrlElement.addEventListener('click', () => {
 
 // Copy results to clipboard
 shareButton.addEventListener('click', async () => {
-    console.log(score)
     try {
         await navigator.clipboard.writeText(`🎧 Playlistle 🎶\n\nFinal score: ${score}\nHighscore: ${getPlaylistHighscore(optionDropdown.value)}\nSongs Attempted: ${songCount}\nGamemode: ${gamemode[0].toUpperCase() + gamemode.substring(1).toLocaleLowerCase()} ([${optionDropdown.options[optionDropdown.selectedIndex].innerText}](https://open.spotify.com/${gamemode.slice(0, -1)}/${optionDropdown.value}))\n\n🎵 [Placeholder for link] 🎙️`);
         shareButton.innerText = "Copied!";
@@ -583,7 +582,6 @@ function showResults() {
         Songs Attempted: ${songCount}\n
         Gamemode: ${gamemode[0].toUpperCase() + gamemode.substring(1).toLocaleLowerCase()} (${optionDropdown.options[optionDropdown.selectedIndex].innerText})
         `;
-    console.log(score)
 }
 
 //#endregion
