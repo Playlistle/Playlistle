@@ -214,19 +214,21 @@ export async function randomSongFromPlaylist(playlistUrl: string) {
 
         const randNumber = Math.floor(Math.random() * playlist.tracks.total)
         const randomSongInfo = await fetchSpotify(`playlists/${playlistUrl}/tracks?limit=1&offset=${randNumber}`);
-        const track = randomSongInfo.items[0].track
 
-        if (track.preview_url) {
-            validSongFound = true;
-            const randomSong = {
-                name: track.name,
-                id: track.id,
-                preview_url: track.preview_url,
-                artists: track.artists.map((artist: SimplifiedArtist) => artist.name).join(', '),
-                image: track.album.images[0].url,
-                spotify_url: track.external_urls.spotify
-            };
-            return randomSong;
+        if (randomSongInfo.items[0].track) {
+            const track = randomSongInfo.items[0].track
+            if (track.preview_url) {
+                validSongFound = true;
+                const randomSong = {
+                    name: track.name,
+                    id: track.id,
+                    preview_url: track.preview_url,
+                    artists: track.artists.map((artist: SimplifiedArtist) => artist.name).join(', '),
+                    image: track.album.images[0].url,
+                    spotify_url: track.external_urls.spotify
+                };
+                return randomSong;
+            }
         }
 
         console.log("not quite")
