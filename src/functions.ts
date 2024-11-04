@@ -97,16 +97,30 @@ export function setupAutocomplete() {
 
 //#region FUNCTIONS
 export async function fetchSpotify(reference: string) {
-    const promise = await appwriteFunctions.createExecution(
-        APPWRITE.FUNCTIONS.GET_API.ID,
-        undefined,
-        false,
-        reference,
-        ExecutionMethod.GET
-    );
-
-    const response = JSON.parse(promise.responseBody)
-    return response
+    const maxTries = 3;
+    let count = 0
+    
+    while (true) {
+        try {
+            const promise = await appwriteFunctions.createExecution(
+                APPWRITE.FUNCTIONS.GET_API.ID,
+                undefined,
+                false,
+                reference,
+                ExecutionMethod.GET
+            );
+            const response = JSON.parse(promise.responseBody)
+            return response
+        } catch (error) {
+            // handle exception
+            console.log("Retying Fetch...")
+            count++
+            if (count == maxTries) {
+                alert("error happened idk why, reload the page and u should be good :thumbs-up:")
+                throw error; 
+            }
+        }
+    }
 }
 
 // Post document to the database
@@ -191,12 +205,7 @@ export async function randomSongFromPlaylist(playlistUrl: string) {
 
         const randNumber = Math.floor(Math.random() * playlist.tracks.total)
         const randomSongInfo = await fetchSpotify(`playlists/${playlistUrl}/tracks?limit=1&offset=${randNumber}`);
-        console.log(randomSongInfo)
-        console.log(playlist.tracks.total)
-        console.log(playlistUrl)
-        console.log(randNumber)
-        if (!randomSongInfo.items[0].track) alert("nasa doesn't know what caused this error LMAO, just reload the page and u should be good")
-        const track = await randomSongInfo.items[0].track
+        const track = randomSongInfo.items[0].track
 
         if (track.preview_url) {
             validSongFound = true;
