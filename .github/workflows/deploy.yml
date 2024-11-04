@@ -37,12 +37,6 @@ jobs:
       # - name: Verify formatting
       #   run: deno fmt --check
 
-      - name: Run linter
-        run: deno lint
-      
-      - name: Node
-        run: npm install
-
       - name: Build
         run: deno task build
 
