@@ -37,6 +37,9 @@ jobs:
       # - name: Verify formatting
       #   run: deno fmt --check
 
+      - name: Create dist directory
+        run: mkdir -p dist
+
       - name: Build
         run: deno task build
 
