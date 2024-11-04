@@ -274,7 +274,7 @@ export async function getPlaylistSongNames(playlistUrl: string, bypass?: boolean
     do {
         const batch = await fetchSpotify(`playlists/${playlistUrl}/tracks?limit=${limit}&offset=${offset}`)
         for (const track of batch.items) {
-            if (track.track.id && track.track.preview_url) {
+            if (!track == null && track.track.id && track.track.preview_url) {
                 playlistSongs.push({
                     name: track.track.name,
                     id: track.track.id,
