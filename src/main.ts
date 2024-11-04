@@ -62,6 +62,8 @@ const updateButton = document.getElementById("update-btn") as HTMLButtonElement;
 
 // Initialize the game by fetching a random song from the playlist
 async function initializeGame() {
+    newSongButton.disabled = false
+
     if (isGettingNewSong) {
         return
     }
@@ -303,13 +305,13 @@ processUrlButton.addEventListener('click', async () => {
         // Add playlist to the dropdown and local storage
         addPlaylistToDropdown(playlistId, playlistData.name);
 
-            // Clear the input field after adding the playlist
-            urlInput.value = '';
-        } else {
-            console.error('Invalid playlist data received');
-            alert("Error getting playlist (Make sure to make your playlist public!)")
-        }
+        // Clear the input field after adding the playlist
+        urlInput.value = '';
+    } else {
+        console.error('Invalid playlist data received');
+        alert("Error getting playlist (Make sure to make your playlist public!)")
     }
+}
 );
 
 // Function to remove the selected playlist from the dropdown and local storage
@@ -335,6 +337,11 @@ removeOptionButton.addEventListener('click', () => {
 
     // Reset the dropdown to the placeholder option
     optionDropdown.value = ''; // This sets it to the first option
+
+    submitButton.disabled = true;
+    skipButton.disabled = true;
+    guessInput.disabled = true;
+    newSongButton.disabled = true
 });
 
 // Function to handle playlist selection change
