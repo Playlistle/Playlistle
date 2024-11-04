@@ -37,12 +37,6 @@ jobs:
       # - name: Verify formatting
       #   run: deno fmt --check
 
-      - name: Create dist directory
-        run: mkdir -p ./dist
-      
-      - name: Create assets directory
-        run: mkdir -p ./dist/assets
-
       - name: Build
         run: deno task build
 
@@ -51,7 +45,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           name: github-pages
-          path: /dist
+          path: ./dist
 
 
       # - name: Run tests
