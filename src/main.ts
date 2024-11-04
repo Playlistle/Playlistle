@@ -5,16 +5,16 @@ import * as fn from "./functions.ts"
 
 // Global Variables
 let playlistId = '';
-let artistId = '';
-let albumId = '';
+let _artistId: string;
+let _albumId: string;
 let correctAnswer = '';
 let gamemode = 'playlists';
-let lastSong: any;
+let lastSong: fn.RandomSong;
 let guessCount: number;
 let startTime: number;
-let startTime1: number;
-let startTime2: number;
-let startTime3: number;
+let _startTime1: number;
+let _startTime2: number;
+let _startTime3: number;
 let songLength: number;
 let guesses: string[];
 let score = 0;
@@ -97,7 +97,7 @@ async function initializeGame() {
 
     finishedRound = false
 
-    let randomSong: any;
+    let randomSong: fn.RandomSong;
     let gotSong = false
 
     // Hide the cover and song name
@@ -121,7 +121,7 @@ async function initializeGame() {
     // Update UI elements with song details
     correctAnswer = randomSong?.artists as string + " - " + randomSong?.name as string;
     songInfoElement.innerText = `${randomSong?.artists as string} - ${randomSong?.name as string}`;
-    songInfoElement.setAttribute("href", randomSong?.main_url as string);
+    songInfoElement.setAttribute("href", randomSong?.spotify_url as string);
     imageUrlElement.setAttribute("src", randomSong?.image as string);
 
     feedbackElement.innerText = '';
@@ -144,7 +144,7 @@ async function initializeGame() {
     await audioElement.load();
 
     startTime = Math.random() * 29; // Random start time for audio
-    startTime1 = startTime
+    _startTime1 = startTime
 
     // Play audio and pause after a short duration
     audioElement.addEventListener('loadedmetadata', () => {
@@ -505,7 +505,7 @@ function guessIterator() {
         case 1:
 
             songLength = 1;
-            startTime1 = startTime
+            _startTime1 = startTime
             startTime = Math.random() * 29;
             inputLabel.innerText = "guess 2 (1 second):"
             guessInput.value = '';
@@ -514,7 +514,7 @@ function guessIterator() {
 
         case 2:
             songLength = 3;
-            startTime2 = startTime
+            _startTime2 = startTime
             startTime = Math.random() * 29;
             inputLabel.innerText = "guess 3 (3 seconds):"
             guessInput.value = '';
@@ -531,7 +531,7 @@ function guessIterator() {
             submitButton.disabled = true;
             skipButton.disabled = true;
             guessInput.disabled = true;
-            startTime3 = startTime
+            _startTime3 = startTime
             revealSongDetails();
             break;
     }

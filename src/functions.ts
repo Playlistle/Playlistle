@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { Client, Databases, Functions, ExecutionMethod, Query, Models, Permission, Role } from "npm:appwrite";
-import { SimplifiedArtist, Album, Track } from "npm:spotify-types"
+import { SimplifiedArtist } from "npm:spotify-types"
 
 //#region CONSTANTS
 export const APPWRITE = {
@@ -31,6 +31,15 @@ let cachedSongs: string[] = [];
 const appwriteClient = new Client().setProject(APPWRITE.PROJECT.ID).setEndpoint('https://cloud.appwrite.io/v1')
 export const appwriteDatabases = new Databases(appwriteClient)
 export const appwriteFunctions = new Functions(appwriteClient)
+
+export type RandomSong = {
+    name: string; 
+    id: string; 
+    preview_url: string; 
+    artists: string; 
+    image: string; 
+    spotify_url: string;
+} | undefined
 
 //#endregion
 
@@ -117,7 +126,7 @@ export async function fetchSpotify(reference: string) {
             count++
             if (count == maxTries) {
                 alert("error happened idk why, reload the page and u should be good :thumbs-up:")
-                throw error; 
+                throw error;
             }
         }
     }
@@ -152,7 +161,7 @@ export function databaseUpdate(collectionID: string, documentID: string, data: P
 }
 
 // Delete document in the database
-function databaseDelete(collectionID: string, documentID: string) {
+export function databaseDelete(collectionID: string, documentID: string) {
     appwriteDatabases.deleteDocument(
         APPWRITE.DATABASES.MAIN.ID,
         collectionID,
