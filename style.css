@@ -66,6 +66,10 @@ button:hover {
     gap: 10px;
 }
 
+#image-url {
+    transition: .3s;
+}
+
 #image-url:hover {
     cursor: pointer;
     opacity: .7;
@@ -87,6 +91,14 @@ button:hover {
 #externals > a > img {
     height: 25px;
     width: 25px;
+    transition: .3s;
+}
+
+#externals > a > img:hover {
+    height: 30px;
+    width: 30px;
+    opacity: .7;
+    transition: .3s;
 }
 
 /* Modal CSS */
