@@ -39,6 +39,9 @@ jobs:
 
       - name: Run linter
         run: deno lint
+      
+      - name: Build
+        run: deno task build
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
