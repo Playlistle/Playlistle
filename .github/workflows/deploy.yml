@@ -38,10 +38,10 @@ jobs:
       #   run: deno fmt --check
 
       - name: Create dist directory
-        run: mkdir -p /dist
+        run: mkdir -p ./dist
       
       - name: Create assets directory
-        run: mkdir -p /dist/assets
+        run: mkdir -p ./dist/assets
 
       - name: Build
         run: deno task build
