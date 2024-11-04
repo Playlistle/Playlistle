@@ -76,6 +76,19 @@ button:hover {
     width: 500px;
 }
 
+#externals {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    padding: 50px;
+}
+
+#externals > a > img {
+    height: 25px;
+    width: 25px;
+}
+
 /* Modal CSS */
 
 .modal {
