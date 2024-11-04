@@ -63,6 +63,9 @@ const updateButton = document.getElementById("update-btn") as HTMLButtonElement;
 // Initialize the game by fetching a random song from the playlist
 async function initializeGame() {
     newSongButton.disabled = false
+    submitButton.disabled = true;
+    skipButton.disabled = true;
+    guessInput.disabled = true;
 
     if (isGettingNewSong) {
         return
@@ -78,7 +81,6 @@ async function initializeGame() {
         showResults();
         revealSongDetails()
         setLives(3)
-        setScore(0)
         finishedGame = true
         submitButton.disabled = true;
         skipButton.disabled = true;
@@ -89,6 +91,7 @@ async function initializeGame() {
 
     if (finishedGame) {
         setLives(3)
+        setScore(0)
         finishedGame = false
     }
 
@@ -427,6 +430,7 @@ imageUrlElement.addEventListener('click', () => {
 
 // Copy results to clipboard
 shareButton.addEventListener('click', async () => {
+    console.log(score)
     try {
         await navigator.clipboard.writeText(`🎧 Playlistle 🎶\n\nFinal score: ${score}\nHighscore: ${getPlaylistHighscore(optionDropdown.value)}\nSongs Attempted: ${songCount}\nGamemode: ${gamemode[0].toUpperCase() + gamemode.substring(1).toLocaleLowerCase()} ([${optionDropdown.options[optionDropdown.selectedIndex].innerText}](https://open.spotify.com/${gamemode.slice(0, -1)}/${optionDropdown.value}))\n\n🎵 [Placeholder for link] 🎙️`);
         shareButton.innerText = "Copied!";
@@ -579,6 +583,7 @@ function showResults() {
         Songs Attempted: ${songCount}\n
         Gamemode: ${gamemode[0].toUpperCase() + gamemode.substring(1).toLocaleLowerCase()} (${optionDropdown.options[optionDropdown.selectedIndex].innerText})
         `;
+    console.log(score)
 }
 
 //#endregion
