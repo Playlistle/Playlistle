@@ -29,7 +29,7 @@ button:hover {
     background-color: #212324;
 }
 
-#header {
+#header, #bugs {
     flex-direction: column;
 }
 
@@ -100,6 +100,11 @@ button:hover {
     opacity: .7;
     transition: .3s;
 }
+
+#bugs {
+    flex-direction: column;
+}
+
 
 /* Modal CSS */
 
