@@ -14,7 +14,7 @@ div {
     margin: 10px;
 }
 
-h1, h2, h3, label {
+h1, h2, h3, label, p {
     text-align: center;
     align-content: center;
 }
