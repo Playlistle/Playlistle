@@ -99,7 +99,7 @@ export function setupAutocomplete() {
 export async function fetchSpotify(reference: string) {
     const maxTries = 3;
     let count = 0
-    
+
     while (true) {
         try {
             const promise = await appwriteFunctions.createExecution(

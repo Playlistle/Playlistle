@@ -130,6 +130,7 @@ async function initializeGame() {
     guessInput.disabled = false
     submitButton.disabled = false;
     skipButton.disabled = false;
+    replayButton.disabled = false;
     guessInput.value = '';
     inputLabel.innerText = "guess 1 (0.5 seconds):";
 
@@ -454,6 +455,11 @@ window.addEventListener('click', () => {
 // Load playlists from local storage when the page is loaded
 window.addEventListener('load', () => {
     gamemode = "playlists";
+    newSongButton.disabled = true;
+    submitButton.disabled = true;
+    skipButton.disabled = true;
+    guessInput.disabled = true;
+    replayButton.disabled = true;
 
     loadPlaylistsFromLocalStorage();
 });
