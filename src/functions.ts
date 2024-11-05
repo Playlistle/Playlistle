@@ -1,45 +1,12 @@
 // deno-lint-ignore-file no-explicit-any
-import { Client, Databases, Functions, ExecutionMethod, Query, Models, Permission, Role } from "npm:appwrite";
+import { ExecutionMethod, Query, Models, Permission, Role } from "npm:appwrite";
 import { SimplifiedArtist } from "npm:spotify-types"
 
-//#region CONSTANTS
-export const APPWRITE = {
-    PROJECT: {
-        ID: '67183945001faccf6f50'
-    },
-    FUNCTIONS: {
-        GET_API: {
-            ID: '67187c7e002b2aaba4af'
-        }
-    },
-    DATABASES: {
-        MAIN: {
-            ID: '671c78ce0008a5ad6270',
-            COLLECTIONS: {
-                PLAYLISTS: {
-                    ID: '671c795b00242248cc4f'
-                },
-                SONGS: {
-                    ID: '671c7ba8000d8234b69c'
-                }
-            }
-        }
-    }
-}
+import { APPWRITE, appwriteDatabases, appwriteFunctions } from "./constants.ts"
+
+//#region VARIABLES
 
 let cachedSongs: string[] = [];
-const appwriteClient = new Client().setProject(APPWRITE.PROJECT.ID).setEndpoint('https://cloud.appwrite.io/v1')
-export const appwriteDatabases = new Databases(appwriteClient)
-export const appwriteFunctions = new Functions(appwriteClient)
-
-export type RandomSong = {
-    name: string; 
-    id: string; 
-    preview_url: string; 
-    artists: string; 
-    image: string; 
-    spotify_url: string;
-} | undefined
 
 //#endregion
 
