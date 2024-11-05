@@ -105,19 +105,6 @@ button:hover {
     flex-direction: column;
 }
 
-#Wtitle {
-    flex-direction: column;
-    align-self: center;
-    padding: 10%;
-}
-
-#big-button {
-    flex-direction: row;
-    justify-content: center;
-    gap: 10px;
-    height: 100px;
-    font-size: 100px;
-}
 
 /* Modal CSS */
 
