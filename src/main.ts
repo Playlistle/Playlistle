@@ -426,7 +426,7 @@ volumeSlider.addEventListener('input', () => {
 
 // Plays song on cover art click
 imageUrlElement.addEventListener('click', () => {
-    playAndPauseAudio(30);
+    playAndPauseAudio(30, 0);
 })
 
 // Copy results to clipboard
