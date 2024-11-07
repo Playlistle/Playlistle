@@ -202,7 +202,7 @@ export async function randomSongFromPlaylist(playlistUrl: string) {
 
     const playlist = await fetchSpotify(`playlists/${playlistUrl}`)
 
-    if (playlist.tracks.total > 300) {
+    if (playlist.tracks.total > 650) {
         alert("Too many songs in the playlist, please use a playlist under 300 songs! (We are working to increase this number in the future)");
         return;
     }
