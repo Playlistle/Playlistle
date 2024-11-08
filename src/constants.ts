@@ -77,12 +77,27 @@ export const html = {
 //#region TYPES
 
 export type RandomSong = {
-    name: string; 
-    id: string; 
-    preview_url: string; 
-    artists: string; 
-    image: string; 
+    name: string;
+    id: string;
+    preview_url: string;
+    artists: string;
+    image: string;
     spotify_url: string;
 } | undefined
+
+export type Source = {
+    type: SourceType
+    url: string
+}
+
+export type SourceType =
+    "playlist" |
+    "album" |
+    "artist"
+
+export type Gamemode =
+    "playlists" |
+    "albums" |
+    "artists"
 
 //#endregion
